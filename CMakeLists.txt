@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 
 set(CORE_TAG main)
 set(INTEGRATIONS_TAG main)
-set(DECODER_TAG beta_tidying)
+set(DECODER_TAG main)
 
 # Pre-retrieve core cmake dependency routines, for bootstrapping up to the full package.
 file(DOWNLOAD https://gitlab.com/api/v4/projects/39963594/repository/files/cmake%2Fadd_dependency%2Ecmake/raw?ref=${CORE_TAG}
