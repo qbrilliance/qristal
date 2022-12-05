@@ -1,7 +1,7 @@
 # Copyright 2022 Quantum Brilliance
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 
-set(CORE_TAG beta_tidying)
+set(CORE_TAG main)
 set(INTEGRATIONS_TAG main)
 set(DECODER_TAG beta_tidying)
 
