@@ -1,9 +1,9 @@
 # Copyright 2022 Quantum Brilliance
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 
-set(CORE_TAG main)
+set(CORE_TAG beta_tidying)
 set(INTEGRATIONS_TAG main)
-set(DECODER_TAG main)
+set(DECODER_TAG beta_tidying)
 
 # Pre-retrieve core cmake dependency routines, for bootstrapping up to the full package.
 file(DOWNLOAD https://gitlab.com/api/v4/projects/39963594/repository/files/cmake%2Fadd_dependency%2Ecmake/raw?ref=${CORE_TAG}
@@ -35,8 +35,8 @@ set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib CACHE PATH "..." FORCE)
 
 # Include CPM for managing dependencies, and set it up to cache them in the deps folder
 set(CPM_DOWNLOAD_VERSION 0.36.0)
-set(CPM_SOURCE_CACHE "${PROJECT_SOURCE_DIR}")
-set(CPM_DOWNLOAD_LOCATION "${CPM_SOURCE_CACHE}/deps/cpm/CPM_${CPM_DOWNLOAD_VERSION}.cmake")
+set(CPM_SOURCE_CACHE "${PROJECT_SOURCE_DIR}/deps")
+set(CPM_DOWNLOAD_LOCATION "${CPM_SOURCE_CACHE}/cpm/CPM_${CPM_DOWNLOAD_VERSION}.cmake")
 
 if(NOT(EXISTS ${CPM_DOWNLOAD_LOCATION}))
   message(STATUS "Downloading CPM.cmake to ${CPM_DOWNLOAD_LOCATION}")
@@ -54,6 +54,12 @@ CPMAddPackage(
   GIT_TAG ${CORE_TAG} # Temporary (for rapid dev).
   GIT_SHALLOW False # Temporary (for rapid dev).
   GITLAB_REPOSITORY qbau/software-and-apps/core
+  SOURCE_DIR ${PROJECT_SOURCE_DIR}/core
+  OPTIONS
+    "CPM_SOURCE_CACHE ${CPM_SOURCE_CACHE}"
+    "XACC_ROOT ${XACC_ROOT}"
+    "EXATN_ROOT ${EXATN_ROOT}"
+    "TNQVM_ROOT ${TNQVM_ROOT}"
 )
 check_missing()
 
@@ -63,6 +69,7 @@ CPMAddPackage(
   GIT_TAG ${INTEGRATIONS_TAG} # Temporary (for rapid dev).
   GIT_SHALLOW False # Temporary (for rapid dev).
   GITLAB_REPOSITORY qbau/software-and-apps/integrations
+  SOURCE_DIR ${PROJECT_SOURCE_DIR}/integrations
 )
 check_missing()
 
@@ -72,6 +79,10 @@ CPMAddPackage(
   GIT_TAG ${DECODER_TAG} # Temporary (for rapid dev).
   GIT_SHALLOW False # Temporary (for rapid dev).
   GITLAB_REPOSITORY qbau/software-and-apps/decoder
+  SOURCE_DIR ${PROJECT_SOURCE_DIR}/decoder
+  OPTIONS
+    "CPM_SOURCE_CACHE ${CPM_SOURCE_CACHE}"
+    "CORE_ROOT ${PROJECT_SOURCE_DIR}/core"
 )
 check_missing()
 
