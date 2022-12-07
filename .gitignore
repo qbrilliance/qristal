@@ -1,0 +1,10 @@
+# Ignore SDK components
+core/
+decoder/
+integrations/
+
+# Dependencies
+deps/
+
+# Build
+build/
