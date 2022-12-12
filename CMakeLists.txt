@@ -89,3 +89,13 @@ check_missing()
 # Print out the installation directory.
 message(STATUS "Installation directory for ${CMAKE_PROJECT_NAME} set to ${CMAKE_INSTALL_PREFIX}.")
 
+# Install the readme and exercises
+install(
+  DIRECTORY exercises
+  DESTINATION ${CMAKE_INSTALL_PREFIX}
+)
+
+install(
+  FILES README.md
+  DESTINATION ${CMAKE_INSTALL_PREFIX}
+)

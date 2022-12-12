@@ -192,5 +192,11 @@ In particular, we set the `noise` option to `True` and choose a QB noise model (
 
 We can see the effect of quantum noises in the resulting measurement distribution. 
 
+## Further examples ##
+
+Following installation, you can find a series of examples in the installed folder `examples`.  These are described [here](examples/README.md).
+
+You can also find a detailed set of introductory exercises in the `exercises` folder.  These can be launched using Jupyter Notebook.
+
 ## Documentation
 [Combined Documentation](doc/user_guide/build/markdown/index.md)
