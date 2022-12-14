@@ -1,0 +1,35 @@
+{
+    "version": 3,
+    "configurePresets": [
+        {
+            "name": "dev",
+            "displayName": "Dev Config",
+            "description": "Default CMake Configurations for internal QB Development",
+            "cacheVariables": {
+                "QB_CORE_REPO_ID": {
+                    "type": "STRING",
+                    "value": "39963594"
+                },
+                "QB_SDK_GITLAB_ORG": {
+                    "type": "STRING",
+                    "value": "qbau/software-and-apps"
+                }
+            }
+        },
+        {
+            "name": "public",
+            "displayName": "Public Config",
+            "description": "Default CMake Configurations for public QB repositories",
+            "cacheVariables": {
+                "QB_CORE_REPO_ID": {
+                    "type": "STRING",
+                    "value": "41590729"
+                },
+                "QB_SDK_GITLAB_ORG": {
+                    "type": "STRING",
+                    "value": "qbau/software-and-apps/public"
+                }
+            }
+        }
+    ]
+}
