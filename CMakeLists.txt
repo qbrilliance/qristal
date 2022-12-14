@@ -5,8 +5,14 @@ set(CORE_TAG main)
 set(INTEGRATIONS_TAG main)
 set(DECODER_TAG main)
 
+# QB's core Gitlab repo ID (to fetch the add_dependency.cmake script) 
+# Default is the public repo. 
+set(QB_CORE_REPO_ID 41590729 CACHE STRING "QB SDK core Gitlab repository Id")
+# Root Gitlab org. of SDK repos
+set(QB_SDK_GITLAB_ORG qbau/software-and-apps/public CACHE STRING "QB SDK Gitlab group")
+
 # Pre-retrieve core cmake dependency routines, for bootstrapping up to the full package.
-file(DOWNLOAD https://gitlab.com/api/v4/projects/39963594/repository/files/cmake%2Fadd_dependency%2Ecmake/raw?ref=${CORE_TAG}
+file(DOWNLOAD https://gitlab.com/api/v4/projects/${QB_CORE_REPO_ID}/repository/files/cmake%2Fadd_dependency%2Ecmake/raw?ref=${CORE_TAG}
   ${CMAKE_CURRENT_LIST_DIR}/deps/add_dependency.cmake
   HTTPHEADER "PRIVATE-TOKEN: $ENV{GITLAB_PRIVATE_TOKEN}"
   STATUS STATUS_LIST)
@@ -53,7 +59,7 @@ CPMAddPackage(
   NAME core
   GIT_TAG ${CORE_TAG} # Temporary (for rapid dev).
   GIT_SHALLOW False # Temporary (for rapid dev).
-  GITLAB_REPOSITORY qbau/software-and-apps/core
+  GITLAB_REPOSITORY ${QB_SDK_GITLAB_ORG}/core
   SOURCE_DIR ${PROJECT_SOURCE_DIR}/core
   OPTIONS
     "CPM_SOURCE_CACHE ${CPM_SOURCE_CACHE}"
@@ -68,7 +74,7 @@ CPMAddPackage(
   NAME integrations
   GIT_TAG ${INTEGRATIONS_TAG} # Temporary (for rapid dev).
   GIT_SHALLOW False # Temporary (for rapid dev).
-  GITLAB_REPOSITORY qbau/software-and-apps/integrations
+  GITLAB_REPOSITORY ${QB_SDK_GITLAB_ORG}/integrations
   SOURCE_DIR ${PROJECT_SOURCE_DIR}/integrations
 )
 check_missing()
@@ -78,11 +84,13 @@ CPMAddPackage(
   NAME decoder
   GIT_TAG ${DECODER_TAG} # Temporary (for rapid dev).
   GIT_SHALLOW False # Temporary (for rapid dev).
-  GITLAB_REPOSITORY qbau/software-and-apps/decoder
+  GITLAB_REPOSITORY ${QB_SDK_GITLAB_ORG}/decoder
   SOURCE_DIR ${PROJECT_SOURCE_DIR}/decoder
   OPTIONS
     "CPM_SOURCE_CACHE ${CPM_SOURCE_CACHE}"
     "CORE_ROOT ${PROJECT_SOURCE_DIR}/core"
+    "QB_CORE_REPO_ID ${QB_CORE_REPO_ID}"
+    "QB_SDK_GITLAB_ORG ${QB_SDK_GITLAB_ORG}"
 )
 check_missing()
 
