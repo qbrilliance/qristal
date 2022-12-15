@@ -202,9 +202,11 @@ We can see the effect of quantum noises in the resulting measurement distributio
 
 ## Further examples ##
 
-Following installation, you can find a series of examples in the installed folder `examples`.  These are described [here](examples/README.md).
+Following installation, you can find 
 
-You can also find a detailed set of introductory exercises in the `exercises` folder.  These can be launched using Jupyter Notebook.
+- A series of examples in the installed folder `examples`.  These are described [here](examples/README.md).
+- A detailed set of introductory exercises in the `exercises` folder.  These can be launched using Jupyter Notebook.
+- A standalone [Quantum Decoder application](docs/README_decoder.md).
 
 ## Documentation
 If you have built and installed the documentation (see [compilation](#compilation)), you can find it [here](docs/html/index.html).
