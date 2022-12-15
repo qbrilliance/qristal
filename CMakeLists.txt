@@ -5,8 +5,8 @@ set(CORE_TAG main)
 set(INTEGRATIONS_TAG main)
 set(DECODER_TAG main)
 
-# QB's core Gitlab repo ID (to fetch the add_dependency.cmake script) 
-# Default is the public repo. 
+# QB's core Gitlab repo ID (to fetch the add_dependency.cmake script)
+# Default is the public repo.
 set(QB_CORE_REPO_ID 41590729 CACHE STRING "QB SDK core Gitlab repository Id")
 # Root Gitlab org. of SDK repos
 set(QB_SDK_GITLAB_ORG qbau/software-and-apps/public CACHE STRING "QB SDK Gitlab group")
@@ -95,7 +95,7 @@ CPMAddPackage(
 check_missing()
 
 # Print out the installation directory.
-message(STATUS "Installation directory for ${CMAKE_PROJECT_NAME} set to ${CMAKE_INSTALL_PREFIX}.")
+message(STATUS "Installation directory for ${PROJECT_NAME} set to ${CMAKE_INSTALL_PREFIX}.")
 
 # Install the readme and exercises
 install(
