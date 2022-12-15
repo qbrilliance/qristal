@@ -1,10 +1,10 @@
 # Quantum Brilliance SDK
 
-[The **QB SDK**](doc/markdown/sdk.md) is the QB software development kit for quantum computing.
+The QB SDK is the QB software development kit for quantum computing.
 
 ## Getting Started
 
-For the private beta release, the QB SDK can be installed directly from source or via a pre-built Docker image. The Docker image is provided in the container GitLab container registry associated with SDK repository.  
+For the private beta release, the QB SDK can be installed directly from source or via a pre-built Docker image. The Docker image is provided in the container GitLab container registry associated with SDK repository.
 
 ### Docker
 
@@ -14,7 +14,7 @@ For the private beta release, the QB SDK can be installed directly from source o
 docker login registry.gitlab.com
 ```
 
-Enter your GitLab login credential as prompted. 
+Enter your GitLab login credential as prompted.
 
 2. Start the QB SDK container
 
@@ -24,15 +24,15 @@ docker run -it --name qbsdk -d registry.gitlab.com/qbau/software-and-apps/public
 
 3. Connect to the QB SDK container
 
-After starting the container, you can connect to it via a terminal or via VSCode. 
+After starting the container, you can connect to it via a terminal or via VSCode.
 
-- For the terminal, run the following command to attach to a terminal session inside the container. 
+- For the terminal, run the following command to attach to a terminal session inside the container.
 
 ```
 docker exec -it qbsdk bash
 ```
 
-- If you prefer using VSCode, you can "attach" VS Code to the  running `qbsdk` Docker container. 
+- If you prefer using VSCode, you can "attach" VS Code to the  running `qbsdk` Docker container.
 
 To attach to the `qbsdk` Docker container, either select `Dev Containers: Attach to Running Container...` from the `Command Palette` (F1) or use the `Remote Explorer` in the `Activity Bar` and from the `Containers` view, select the `Attach to Container` inline action on the container. In both methods, a dropdown will appear, select the `qbsdk` container.
 
@@ -62,31 +62,35 @@ At a minimum, the following packages are required:
 
 - OpenBLAS
 
-- Curl 
+- Curl
 
 
 For example, on Debian-based distributions (e.g., Ubuntu), we can use `apt` to install all above prerequisites:
 
 ```
-sudo apt install build-essential cmake gfortran libboost-all-dev libcurl4-openssl-dev  libeigen3-dev libopenblas-dev libpython3-dev python3 python3-pip 
+sudo apt install build-essential cmake gfortran libboost-all-dev libcurl4-openssl-dev  libeigen3-dev libopenblas-dev libpython3-dev python3 python3-pip
 ```
 
 **Compilation**
 
-After cloning the [SDK repository](https://gitlab.com/qbau/software-and-apps/public/QBSDK), compile and install the QB SDK with
+<a name="compilation"></a>
+
+After cloning the QB SDK repository, compile and install it with
 
 ```
 export GITLAB_PRIVATE_TOKEN=<YOUR GITLAB API KEY>
 mkdir build && cd build
-cmake .. -DINSTALL_MISSING=ON 
+cmake .. -DINSTALL_MISSING=ON
 make -j$(nproc) install
 ```
+
+If you also wish to build the html documentation, you can pass `-DQB_BUILD_DOCS=ON` to `cmake`.
 
 ## Tutorial
 
 When using the QB SDK, a user workflow normally consists of the following steps:
 
-- Define a quantum circuit, for example, as an OpenQASM source string. 
+- Define a quantum circuit, for example, as an OpenQASM source string.
 
 - Configure the QB SDK runtime, e.g., the accelerator backend, number of measurement shots, etc.
 
@@ -199,4 +203,4 @@ Following installation, you can find a series of examples in the installed folde
 You can also find a detailed set of introductory exercises in the `exercises` folder.  These can be launched using Jupyter Notebook.
 
 ## Documentation
-[Combined Documentation](doc/user_guide/build/markdown/index.md)
+If you have built and installed the documentation (see [compilation](#compilation)), you can find it [here](docs/html/index.html).
