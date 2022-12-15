@@ -19,12 +19,16 @@ Enter your GitLab login credential as prompted.
 2. Start the QB SDK container
 
 ```
-docker run -it --name qbsdk -d registry.gitlab.com/qbau/software-and-apps/public/qbsdk
+docker run -it --name qbsdk -d -p 8889:8889 -p 8080:8080 registry.gitlab.com/qbau/software-and-apps/public/qbsdk
 ```
+
+The above command will start the QB SDK container and map TCP ports 8080 and 8889 of the container to the same ports on the Docker host (your computer).
+
+From your web browser, you can access the SDK documentation at http://localhost:8080 and a JupyterLab environment at http://localhost:8889 to view Python examples and start prototyping with the SDK.
 
 3. Connect to the QB SDK container
 
-After starting the container, you can connect to it via a terminal or via VSCode.
+After starting the container, besides the [JupyterLab environment](http://localhost:8889), you can connect (attach) directly to the container via a terminal or VSCode.
 
 - For the terminal, run the following command to attach to a terminal session inside the container.
 
@@ -194,7 +198,7 @@ print("Results:\n", my_sim.out_raw[0][0])
 
 In particular, we set the `noise` option to `True` and choose a QB noise model (e.g., `qb-nm1`).
 
-We can see the effect of quantum noises in the resulting measurement distribution. 
+We can see the effect of quantum noises in the resulting measurement distribution.
 
 ## Further examples ##
 
