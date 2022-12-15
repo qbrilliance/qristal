@@ -1,9 +1,9 @@
 # Copyright 2022 Quantum Brilliance
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 
-set(CORE_TAG main)
-set(INTEGRATIONS_TAG main)
-set(DECODER_TAG main)
+set(CORE_TAG v0.1.0)
+set(INTEGRATIONS_TAG v0.1.0)
+set(DECODER_TAG v0.1.0)
 
 # QB's core Gitlab repo ID (to fetch the add_dependency.cmake script)
 # Default is the public repo.
