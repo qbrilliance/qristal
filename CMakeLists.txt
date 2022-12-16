@@ -1,9 +1,9 @@
 # Copyright 2022 Quantum Brilliance
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 
-set(CORE_TAG v0.1.0)
-set(INTEGRATIONS_TAG v0.1.0)
-set(DECODER_TAG v0.1.0)
+set(CORE_TAG v0.1.1)
+set(INTEGRATIONS_TAG v0.1.1)
+set(DECODER_TAG v0.1.1)
 
 # QB's core Gitlab repo ID (to fetch the add_dependency.cmake script)
 # Default is the public repo.
@@ -19,7 +19,7 @@ file(DOWNLOAD https://gitlab.com/api/v4/projects/${QB_CORE_REPO_ID}/repository/f
 list(POP_FRONT STATUS_LIST STATUS_LIST0)
 
 if(STATUS_LIST0)
-  message(FATAL_ERROR "Failed to download core. Please set environment variable GITLAB_PRIVATE_TOKEN.")
+  message(FATAL_ERROR "Failed to download core. Please check: environment variable GITLAB_PRIVATE_TOKEN, command-line option --preset, and the value of CORE_TAG.")
 endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/deps ${CMAKE_MODULE_PATH})
