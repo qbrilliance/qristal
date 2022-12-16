@@ -8,6 +8,8 @@ For the private beta release, the QB SDK can be installed directly from source o
 
 ### Docker
 
+Depending on how you have set up Docker on your system, you may or may not need to run the following commands as root.
+
 1. Login to GitLab container registry
 
 ```
