@@ -21,7 +21,7 @@ Enter your GitLab login credential as prompted.
 2. Start the QB SDK container
 
 ```
-docker run -it --name qbsdk -d -p 8889:8889 -p 8080:8080 registry.gitlab.com/qbau/software-and-apps/public/qbsdk
+docker run --rm -it --name qbsdk -d -p 8889:8889 -p 8080:8080 registry.gitlab.com/qbau/software-and-apps/public/qbsdk
 ```
 
 The above command will start the QB SDK container and map TCP ports 8080 and 8889 of the container to the same ports on the Docker host (your computer).
@@ -45,7 +45,7 @@ To attach to the `qbsdk` Docker container, either select `Dev Containers: Attach
 4. Stop and remove the container
 
 ```
-docker stop qbsdk && docker rm -v qbsdk
+docker stop qbsdk
 ```
 
 ### Install from source
@@ -148,6 +148,18 @@ print("Ran successfully!")
 print("Results:\n", my_sim.out_raw[0][0])
 ```
 
+If you run the example, you will get an output similar to the following (right-hand values will both be around 50):
+
+```
+About to run quantum program...
+Ran successfully!
+Results:
+ {
+    "00": 45,
+    "11": 55
+}
+```
+
 If using the pre-built Docker image, users will also have access to the beta version of the QB emulator allowing for emulating QB hardware devices. The emulation (noisy simulation) can be enabled with
 
 ```
@@ -200,7 +212,22 @@ print("Results:\n", my_sim.out_raw[0][0])
 
 In particular, we set the `noise` option to `True` and choose a QB noise model (e.g., `qb-nm1`).
 
-We can see the effect of quantum noises in the resulting measurement distribution.
+We can see the effect of quantum noises in the resulting measurement distribution.  If you run the noisy example, you will get an output similar to the following:
+
+```
+About to run quantum program...
+Ran successfully!
+Results:
+ {
+    "00": 43,
+    "01": 2,
+    "10": 1,
+    "11": 54
+}
+```
+
+Values for "00" and "11" will be around 50, whereas those for "01" and "10" will be around 0.
+
 
 ## Further examples ##
 
