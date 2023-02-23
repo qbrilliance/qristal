@@ -58,9 +58,9 @@ At a minimum, the following packages are required:
 
 - Python3.8+
 
-- gcc, g++, and gfortran  (version 7+)
+- gcc, g++, and gfortran (version 7+).  Usage of clang is supported, but gcc/g++ is still required for building exatn and tnqvm.
 
-- cmake
+- cmake (version 3.20+)
 
 - Eigen 3.4+
 
@@ -90,9 +90,14 @@ cmake .. -DINSTALL_MISSING=ON
 make -j$(nproc) install
 ```
 
-If you also wish to build the html documentation, you can pass `-DQB_BUILD_DOCS=ON` to `cmake`.
+If you wish to only install missing C++ or Python dependencies, instead of passing `-DINSTALL_MISSING=ON` you can pass `-DINSTALL_MISSING=CXX` or `-DINSTALL_MISSING=PYTHON`.
 
-## Tutorial
+If you also wish to build the C++ noise-aware circuit placement based on the [TKET](https://github.com/CQCL/tket) library, you can pass `-DWITH_TKET=ON` to `cmake`.
+
+Along with the `-DINSTALL_MISSING=ON` option as shown above, `cmake` will automatically pull in and build TKET for you.
+Alternatively, if you have an existing TKET installation, you can pass `-DWITH_TKET=ON -DTKET_DIR=<YOUR TKET INSTALLATION DIR>` to `cmake` to let it use your installation rather than building TKET from source.  
+
+If you also wish to build the html documentation, you can pass `-DQB_BUILD_DOCS=ON` to `cmake`.
 
 When using the QB SDK, a user workflow normally consists of the following steps:
 

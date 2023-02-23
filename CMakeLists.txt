@@ -1,73 +1,114 @@
 # Copyright 2022 Quantum Brilliance
-cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 
-set(CORE_TAG v0.1.1)
-set(INTEGRATIONS_TAG v0.1.1)
-set(DECODER_TAG v0.1.1)
+# Set minimum cmake version
+set(MIN_CMAKE_VERSION 3.20)
+cmake_minimum_required(VERSION ${MIN_CMAKE_VERSION} FATAL_ERROR)
 
-# QB's core Gitlab repo ID (to fetch the add_dependency.cmake script)
-# Default is the public repo.
-set(QB_CORE_REPO_ID 41590729 CACHE STRING "QB SDK core Gitlab repository Id")
-# Root Gitlab org. of SDK repos
-set(QB_SDK_GITLAB_ORG qbau/software-and-apps/public CACHE STRING "QB SDK Gitlab group")
+# Dependencies
+set(CORE_VERSION          "0.1.1")
+set(INTEGRATIONS_VERSION  "0.1.1")
+set(DECODER_VERSION       "0.1.1")
 
-# Pre-retrieve core cmake dependency routines, for bootstrapping up to the full package.
-file(DOWNLOAD https://gitlab.com/api/v4/projects/${QB_CORE_REPO_ID}/repository/files/cmake%2Fadd_dependency%2Ecmake/raw?ref=${CORE_TAG}
-  ${CMAKE_CURRENT_LIST_DIR}/deps/add_dependency.cmake
-  HTTPHEADER "PRIVATE-TOKEN: $ENV{GITLAB_PRIVATE_TOKEN}"
-  STATUS STATUS_LIST)
-list(POP_FRONT STATUS_LIST STATUS_LIST0)
-
-if(STATUS_LIST0)
-  message(FATAL_ERROR "Failed to download core. Please check: environment variable GITLAB_PRIVATE_TOKEN, command-line option --preset, and the value of CORE_TAG.")
+if(NOT DEFINED CORE_TAG)
+  set(CORE_TAG v${CORE_VERSION})
+endif()
+if(NOT DEFINED INTEGRATIONS_TAG)
+  set(INTEGRATIONS_TAG v${INTEGRATIONS_VERSION})
+endif()
+if(NOT DEFINED DECODER_TAG)
+  set(DECODER_TAG v${DECODER_VERSION})
 endif()
 
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/deps ${CMAKE_MODULE_PATH})
-include(add_dependency)
+# Note that you can set -DCORE_TAG=<tag> to a branch, tag or SHA if you want to download and use a specific commit of the core. Same for integrations and decoder.
+
+# Get version number from git tag.  Must be done before the project command is called.
+find_package(Git)
+if(GIT_FOUND)
+  execute_process(
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMAND git describe --tags --abbrev=0
+    OUTPUT_VARIABLE PROJECT_VERSION
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+  string(REGEX REPLACE "^v(.*)" "\\1" PROJECT_VERSION "${PROJECT_VERSION}")
+endif()
 
 # Project
-project(QBSDK
+project(qristal
   VERSION ${PROJECT_VERSION}
-  DESCRIPTION "Quantum Brilliance Software Development Kit"
-  LANGUAGES C CXX)
+  DESCRIPTION "Qristal: Quantum Brilliance Software Development Kit"
+  LANGUAGES C CXX
+)
 
-# Set default installation dir to the build dir
+# Choose C++ standard version
+set(CMAKE_CXX_STANDARD 17 CACHE STRING "Adopted C++ standard.")
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+# Set default installation dir to the build dir.
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT OR NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR} CACHE PATH "..." FORCE)
+  set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR} CACHE PATH "Installation path." FORCE)
+  set(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT OFF)
 endif()
+message(STATUS "Installation directory for ${PROJECT_NAME} set to ${CMAKE_INSTALL_PREFIX}.")
 
-# Set default RPATH to the lib dir of the installation dir
-set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib CACHE PATH "..." FORCE)
+# Set default RPATH to the lib dir of the installation dir.
+set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib CACHE PATH "Search path for shared libraries to encode into binaries." FORCE)
 
-# Include CPM for managing dependencies, and set it up to cache them in the deps folder
+# Work out build type
+set(CMAKE_BUILD_TYPE "None" CACHE STRING "Type of build: None, Release, Debug, RelWithDebInfo or MinSizeRel." FORCE)
+set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "None" "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+
+# Include CPM for managing dependencies, and set it up to cache them in the deps folder.
 set(CPM_DOWNLOAD_VERSION 0.36.0)
-set(CPM_SOURCE_CACHE "${PROJECT_SOURCE_DIR}/deps")
+set(CPM_SOURCE_CACHE "${CMAKE_CURRENT_LIST_DIR}/deps" CACHE PATH "Dependencies path.")
 set(CPM_DOWNLOAD_LOCATION "${CPM_SOURCE_CACHE}/cpm/CPM_${CPM_DOWNLOAD_VERSION}.cmake")
-
-if(NOT(EXISTS ${CPM_DOWNLOAD_LOCATION}))
+if(NOT (EXISTS ${CPM_DOWNLOAD_LOCATION}))
   message(STATUS "Downloading CPM.cmake to ${CPM_DOWNLOAD_LOCATION}")
   file(DOWNLOAD
-    https://github.com/cpm-cmake/CPM.cmake/releases/download/v${CPM_DOWNLOAD_VERSION}/CPM.cmake
-    ${CPM_DOWNLOAD_LOCATION}
+       https://github.com/cpm-cmake/CPM.cmake/releases/download/v${CPM_DOWNLOAD_VERSION}/CPM.cmake
+       ${CPM_DOWNLOAD_LOCATION}
   )
 endif()
-
 include(${CPM_DOWNLOAD_LOCATION})
 
-# Get the core library
-CPMAddPackage(
-  NAME core
-  GIT_TAG ${CORE_TAG} # Temporary (for rapid dev).
-  GIT_SHALLOW False # Temporary (for rapid dev).
-  GITLAB_REPOSITORY ${QB_SDK_GITLAB_ORG}/core
-  SOURCE_DIR ${PROJECT_SOURCE_DIR}/core
-  OPTIONS
-    "CPM_SOURCE_CACHE ${CPM_SOURCE_CACHE}"
-    "XACC_ROOT ${XACC_ROOT}"
-    "EXATN_ROOT ${EXATN_ROOT}"
-    "TNQVM_ROOT ${TNQVM_ROOT}"
-)
-check_missing()
+# Find the core
+find_package(qbcore ${CORE_VERSION} QUIET)
+
+# Try to install the core if it wasn't found.
+if (NOT qbcore_FOUND)
+
+  if (NOT INSTALL_MISSING)
+    message(FATAL_ERROR "Could not find core ${CORE_VERSION}. Please set qbcore_DIR to its installed location, or pass -DINSTALL_MISSING=ON (or =CXX or =PYTHON).")
+  endif()
+
+  # Root Gitlab org. of SDK repos
+  set(QB_SDK_GITLAB_ORG qbau/software-and-apps/public CACHE STRING "QB SDK Gitlab group")
+
+  # Get the core
+  CPMAddPackage(
+    NAME core
+    VERSION ${CORE_VERSION}
+    GIT_TAG ${CORE_TAG}
+    GIT_SHALLOW False # Temporary (for rapid dev).
+    GITLAB_REPOSITORY ${QB_SDK_GITLAB_ORG}/core
+    SOURCE_DIR ${PROJECT_SOURCE_DIR}/core
+    OPTIONS
+      "INSTALL_MISSING ${INSTALL_MISSING}"
+      "CPM_SOURCE_CACHE ${CPM_SOURCE_CACHE}"
+      "CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}"
+      "XACC_ROOT ${XACC_ROOT}"
+      "EXATN_ROOT ${EXATN_ROOT}"
+      "TNQVM_ROOT ${TNQVM_ROOT}"
+      "WITH_TKET ${WITH_TKET}"
+      "TKET_DIR ${TKET_DIR}"
+      "QB_BUILD_DOCS ${QB_BUILD_DOCS}"
+  )
+  include(CMakeFindDependencyMacro)
+  include(${CMAKE_CURRENT_BINARY_DIR}/_deps/core-build/coreDependencies.cmake)
+  set(qbcore_DIR ${core_SOURCE_DIR})
+
+endif()
 
 # Get the integrations library
 CPMAddPackage(
@@ -77,7 +118,6 @@ CPMAddPackage(
   GITLAB_REPOSITORY ${QB_SDK_GITLAB_ORG}/integrations
   SOURCE_DIR ${PROJECT_SOURCE_DIR}/integrations
 )
-check_missing()
 
 # Get the decoder example
 CPMAddPackage(
@@ -87,15 +127,10 @@ CPMAddPackage(
   GITLAB_REPOSITORY ${QB_SDK_GITLAB_ORG}/decoder
   SOURCE_DIR ${PROJECT_SOURCE_DIR}/decoder
   OPTIONS
-    "CPM_SOURCE_CACHE ${CPM_SOURCE_CACHE}"
-    "CORE_ROOT ${PROJECT_SOURCE_DIR}/core"
-    "QB_CORE_REPO_ID ${QB_CORE_REPO_ID}"
-    "QB_SDK_GITLAB_ORG ${QB_SDK_GITLAB_ORG}"
+    "CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}"
+    "SKIP_FIND_CORE ON"
+    "qbcore_FOUND ON"
 )
-check_missing()
-
-# Print out the installation directory.
-message(STATUS "Installation directory for ${PROJECT_NAME} set to ${CMAKE_INSTALL_PREFIX}.")
 
 # Install the readme and exercises
 install(
@@ -107,3 +142,13 @@ install(
   FILES README.md
   DESTINATION ${CMAKE_INSTALL_PREFIX}
 )
+
+# If the core was found elsewhere, create symlinks to all the installed content
+if (qbcore_FOUND)
+  file(GLOB_RECURSE CORE_INSTALL_FILES RELATIVE ${qbcore_DIR} ${qbcore_DIR}/*)
+  foreach(installed_file ${CORE_INSTALL_FILES})
+    cmake_path(GET installed_file PARENT_PATH path)
+    install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_INSTALL_PREFIX}/${path})")
+    install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ${qbcore_DIR}/${installed_file} ${CMAKE_INSTALL_PREFIX}/${installed_file})")
+  endforeach()
+endif()
