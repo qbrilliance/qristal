@@ -1,13 +1,128 @@
-# You can override the included template(s) by including variable overrides
-# SAST customization: https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
-# Secret Detection customization: https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
-# Dependency Scanning customization: https://docs.gitlab.com/ee/user/application_security/dependency_scanning/#customizing-the-dependency-scanning-settings
-# Container Scanning customization: https://docs.gitlab.com/ee/user/application_security/container_scanning/#customizing-the-container-scanning-settings
-# Note that environment variables can be set in several places
-# See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
+variables:
+  CI_IMAGE: quantumbrilliance/ci-ubuntu20.04:sdk-beta-17
+  #CI_IMAGE_INSTALL_MISSING: ?
+
 stages:
-- test
-sast:
+  - build
+  - test
+
+.install_core:
+  before_script:
+    - whoami
+    - echo $PWD
+    - ls *
+    - export ARTEFACTS_DIR=$PWD/../core
+    # The state of the runner is persistent outside the working dir, do delete any previous core dirs.
+    - rm -rf $ARTEFACTS_DIR $QB_DIR/core-local
+    - mv core_artefacts $ARTEFACTS_DIR
+    - cmake --install $ARTEFACTS_DIR/build
+
+ubuntu20-build-triggered-from-upstream:
+  stage: build
+  image: $CI_IMAGE
+  extends: .install_core
+  tags: 
+    - docker-heavy
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "pipeline"
+  needs:
+    - project: qbau/software-and-apps/core
+      job: ubuntu20-build
+      ref: $UPSTREAM_REF
+      artifacts: true
+  script:
+    - echo Using core branch $UPSTREAM_REF
+    - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com".insteadOf https://gitlab.com
+    - cmake -B build . -Dqbcore_DIR=${QB_DIR}/core-local -DCMAKE_INSTALL_PREFIX=$QB_DIR/qristal --preset=dev -DINTEGRATIONS_TAG=main -DDECODER_TAG=main
+    - cmake --build build
+    - rm -rf $QB_DIR/core $QB_DIR/core-local
+  artifacts:
+    when: always
+    paths:
+      - build/cmake_install.cmake
+      - build/_deps
+      - decoder
+      - integrations
+
+ubuntu20-tests-triggered-from-upstream:
   stage: test
-include:
-- template: Security/SAST.gitlab-ci.yml
+  extends: .install_core
+  image: $CI_IMAGE
+  tags: 
+    - docker-heavy
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "pipeline"
+  needs:
+    - "ubuntu20-build-triggered-from-upstream"
+    - project: qbau/software-and-apps/core
+      job: ubuntu20-build
+      ref: $UPSTREAM_REF
+      artifacts: true
+  script:
+    - echo Using core branch $UPSTREAM_REF
+    - cmake --install build
+    - cmake -B build_demo1 $QB_DIR/qristal/examples/cpp/demo1
+    - cmake --build build_demo1
+    - ./build_demo1/demo1
+    - cmake -B build_qaoa $QB_DIR/qristal/examples/cpp/qaoa
+    - cmake --build build_qaoa
+    - ./build_qaoa/qaoa
+    - python3 $QB_DIR/qristal/examples/python/demo1.py
+    - python3 $QB_DIR/qristal/examples/python/quickstart.py
+    - python3 $QB_DIR/qristal/examples/python/vqee_example_1.py
+    - rm -rf $QB_DIR/core $QB_DIR/core-local
+    - rm -rf $QB_DIR/core $QB_DIR/qristal
+
+ubuntu20-build-triggered-locally:
+  stage: build
+  image: $CI_IMAGE
+  extends: .install_core
+  tags: 
+    - docker-heavy
+  rules:
+    - if: $CI_PIPELINE_SOURCE != "pipeline"
+  needs:
+    - project: qbau/software-and-apps/core
+      job: ubuntu20-build
+      ref: main
+      artifacts: true
+  script:
+    - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com".insteadOf https://gitlab.com
+    - cmake -B build . -Dqbcore_DIR=${QB_DIR}/core-local -DCMAKE_INSTALL_PREFIX=$QB_DIR/qristal --preset=dev -DINTEGRATIONS_TAG=main -DDECODER_TAG=main
+    - cmake --build build
+    - rm -rf $QB_DIR/core $QB_DIR/core-local
+  artifacts:
+    when: always
+    paths:
+      - build/cmake_install.cmake
+      - build/_deps
+      - decoder
+      - integrations
+
+ubuntu20-tests-triggered-locally:
+  stage: test
+  extends: .install_core
+  image: $CI_IMAGE
+  tags: 
+    - docker-heavy
+  rules:
+    - if: $CI_PIPELINE_SOURCE != "pipeline"
+  needs:
+    - "ubuntu20-build-triggered-locally"
+    - project: qbau/software-and-apps/core
+      job: ubuntu20-build
+      ref: main
+      artifacts: true
+  script:
+    - cmake --install build
+    - cmake -B build_demo1 $QB_DIR/qristal/examples/cpp/demo1
+    - cmake --build build_demo1
+    - ./build_demo1/demo1
+    - cmake -B build_qaoa $QB_DIR/qristal/examples/cpp/qaoa
+    - cmake --build build_qaoa
+    - ./build_qaoa/qaoa
+    - python3 $QB_DIR/qristal/examples/python/demo1.py
+    - python3 $QB_DIR/qristal/examples/python/quickstart.py
+    - python3 $QB_DIR/qristal/examples/python/vqee_example_1.py
+    - rm -rf $QB_DIR/core $QB_DIR/core-local
+    - rm -rf $QB_DIR/core $QB_DIR/qristal

@@ -1,10 +1,10 @@
-# Quantum Brilliance SDK
+# Quantum Brilliance Qristal SDK
 
-The QB SDK is the QB software development kit for quantum computing.
+Qristal is the QB software development kit for quantum computing.
 
 ## Getting Started
 
-For the private beta release, the QB SDK can be installed directly from source or via a pre-built Docker image. The Docker image is provided in the container GitLab container registry associated with SDK repository.
+QB Qristal can be installed directly from source or via a pre-built Docker image. The Docker image is provided in the container GitLab container registry associated with SDK repository.
 
 ### Docker
 
@@ -18,17 +18,17 @@ docker login registry.gitlab.com
 
 Enter your GitLab login credential as prompted.
 
-2. Start the QB SDK container
+2. Start the QB Qristal container
 
 ```
 docker run --rm -it --name qbsdk -d -p 8889:8889 -p 8080:8080 registry.gitlab.com/qbau/software-and-apps/public/qbsdk
 ```
 
-The above command will start the QB SDK container and map TCP ports 8080 and 8889 of the container to the same ports on the Docker host (your computer).
+The above command will start the QB Qristal container and map TCP ports 8080 and 8889 of the container to the same ports on the Docker host (your computer).
 
-From your web browser, you can access the SDK documentation at http://localhost:8080 and a JupyterLab environment at http://localhost:8889 to view Python examples and start prototyping with the SDK.
+From your web browser, you can access the QB Qristal documentation at http://localhost:8080 and a JupyterLab environment at http://localhost:8889 to view Python examples and start prototyping with QB Qristal.
 
-3. Connect to the QB SDK container
+3. Connect to the QB Qristal container
 
 After starting the container, besides the [JupyterLab environment](http://localhost:8889), you can connect (attach) directly to the container via a terminal or VSCode.
 
@@ -81,7 +81,7 @@ sudo apt install build-essential cmake gfortran libboost-all-dev libcurl4-openss
 
 <a name="compilation"></a>
 
-After cloning the QB SDK repository, compile and install it with
+After cloning the QB Qristal SDK repository, compile and install it with
 
 ```
 export GITLAB_PRIVATE_TOKEN=<YOUR GITLAB API KEY>
@@ -99,11 +99,11 @@ Alternatively, if you have an existing TKET installation, you can pass `-DWITH_T
 
 If you also wish to build the html documentation, you can pass `-DQB_BUILD_DOCS=ON` to `cmake`.
 
-When using the QB SDK, a user workflow normally consists of the following steps:
+When using QB Qristal, a user workflow normally consists of the following steps:
 
 - Define a quantum circuit, for example, as an OpenQASM source string.
 
-- Configure the QB SDK runtime, e.g., the accelerator backend, number of measurement shots, etc.
+- Configure the QB Qristal runtime, e.g., the accelerator backend, number of measurement shots, etc.
 
 - Run the circuit with the specified configurations.
 
@@ -168,10 +168,10 @@ Results:
 If using the pre-built Docker image, users will also have access to the beta version of the QB emulator allowing for emulating QB hardware devices. The emulation (noisy simulation) can be enabled with
 
 ```
-# Import the core of the QB SDK
+# Import the core of QB Qristal
 import qb.core
 
-# Create a quantum computing session using the QB SDK
+# Create a quantum computing session using QB Qristal
 my_sim = qb.core.session()
 
 # Set up meaningful defaults for session parameters
