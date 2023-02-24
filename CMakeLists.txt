@@ -103,6 +103,7 @@ if (NOT qbcore_FOUND)
       "WITH_TKET ${WITH_TKET}"
       "TKET_DIR ${TKET_DIR}"
       "QB_BUILD_DOCS ${QB_BUILD_DOCS}"
+      "WARNINGS ${WARNINGS}"
   )
   include(CMakeFindDependencyMacro)
   include(${CMAKE_CURRENT_BINARY_DIR}/_deps/core-build/coreDependencies.cmake)
@@ -128,6 +129,7 @@ CPMAddPackage(
   SOURCE_DIR ${PROJECT_SOURCE_DIR}/decoder
   OPTIONS
     "CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}"
+    "WARNINGS ${WARNINGS}"
     "SKIP_FIND_CORE ON"
     "qbcore_FOUND ON"
 )
