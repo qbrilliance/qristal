@@ -1,6 +1,5 @@
 variables:
   CI_IMAGE: quantumbrilliance/ci-ubuntu20.04:sdk-beta-17
-  #CI_IMAGE_INSTALL_MISSING: ?
 
 stages:
   - build
