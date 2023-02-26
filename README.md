@@ -4,9 +4,11 @@ Qristal is the QB software development kit for quantum computing.
 
 ## Getting Started
 
-QB Qristal can be installed directly from source or via a pre-built Docker image. The Docker image is provided in the container GitLab container registry associated with SDK repository.
+QB Qristal can be installed directly from source or via a pre-built Docker image. 
 
 ### Docker
+
+The Docker image is provided in the GitLab container registry associated with the SDK repository.
 
 Depending on how you have set up Docker on your system, you may or may not need to run the following commands as root.
 
@@ -16,7 +18,7 @@ Depending on how you have set up Docker on your system, you may or may not need 
 docker run --rm -it --name qbsdk -d -p 8889:8889 registry.gitlab.com/qbau/software-and-apps/public/qbsdk
 ```
 
-The above command will start the QB Qristal container and map TCP port 8889 of the container to the same port on the Docker host (your computer).
+This will start the QB Qristal container and map TCP port 8889 of the container to the same port on the Docker host (your computer).
 
 From your web browser, you can access a JupyterLab environment at http://localhost:8889 to view Python examples and start prototyping with QB Qristal.
 
@@ -30,9 +32,9 @@ After starting the container, besides the [JupyterLab environment](http://localh
 docker exec -it qbsdk bash
 ```
 
-- If you prefer using VSCode, you can "attach" VS Code to the  running `qbsdk` Docker container.
+- If you prefer to use VSCode, you can "attach" it to the  running `qbsdk` Docker container.
 
-To attach to the `qbsdk` Docker container, either select `Dev Containers: Attach to Running Container...` from the `Command Palette` (F1) or use the `Remote Explorer` in the `Activity Bar` and from the `Containers` view, select the `Attach to Container` inline action on the container. In both methods, a dropdown will appear, select the `qbsdk` container.
+To attach to the `qbsdk` Docker container, either select `Dev Containers: Attach to Running Container...` from the `Command Palette` (F1) or use the `Remote Explorer` in the `Activity Bar` and from the `Containers` view, select the `Attach to Container` inline action on the container. In both methods, a dropdown will appear; select the `qbsdk` container.
 
 3. Stop and remove the container
 
