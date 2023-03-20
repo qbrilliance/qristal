@@ -4,21 +4,26 @@ Qristal is the QB software development kit for quantum computing.
 
 ## Getting Started
 
-QB Qristal can be installed directly from source or via a pre-built Docker image. 
+QB Qristal can be installed directly from source or via a pre-built Docker image.
 
 ### Docker
 
-The Docker image is provided in the GitLab container registry associated with the SDK repository.
+Two Docker images are provided in the GitLab container registry associated with the SDK repository.  One is the regular Qristal image, and the other also includes a pre-configured CUDA Quantum installation.
 
 Depending on how you have set up Docker on your system, you may or may not need to run the following commands as root.
 
 1. Start the QB Qristal container
 
+The regular container can be started with
 ```
 docker run --rm -it --name qbsdk -d -p 8889:8889 registry.gitlab.com/qbau/software-and-apps/public/qbsdk
 ```
+If your system has one or more NVIDIA GPUs, you can instead install the [NVIDIA Container Toolkit](https://github.com/NVIDIA/nvidia-docker) and launch the image with CUDA Quantum included, using
+```
+docker run --rm -it --name qbsdk --gpus all -d -p 8889:8889 registry.gitlab.com/qbau/software-and-apps/public/qbsdk_cudaq
+```
 
-This will start the QB Qristal container and map TCP port 8889 of the container to the same port on the Docker host (your computer).
+Either of these commands will start a container and map its TCP port 8889 to the same port on the Docker host (your computer).
 
 From your web browser, you can access a JupyterLab environment at http://localhost:8889 to view Python examples and start prototyping with QB Qristal.
 
@@ -70,6 +75,8 @@ For example, on Debian-based distributions (e.g., Ubuntu), we can use `apt` to i
 ```
 sudo apt install build-essential cmake gfortran libboost-all-dev libcurl4-openssl-dev  libeigen3-dev libopenblas-dev libpython3-dev python3 python3-pip
 ```
+
+Qristal will be built with support for CUDA Quantum if and only if cmake detects that your system has a compatible CUDA Quantum installation.
 
 **Compilation**
 
