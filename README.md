@@ -20,7 +20,7 @@ docker run --rm -it --name qbsdk -d -p 8889:8889 registry.gitlab.com/qbau/softwa
 ```
 If your system has one or more NVIDIA GPUs, you can instead install the [NVIDIA Container Toolkit](https://github.com/NVIDIA/nvidia-docker) and launch the image with CUDA Quantum included, using
 ```
-docker run --rm -it --name qbsdk --gpus all -d -p 8889:8889 registry.gitlab.com/qbau/software-and-apps/public/qbsdk_cudaq
+docker run --rm -it --name qbsdk --gpus all -d -p 8889:8889 registry.gitlab.com/qbau/software-and-apps/public/qbsdk:cudaq
 ```
 
 Either of these commands will start a container and map its TCP port 8889 to the same port on the Docker host (your computer).
