@@ -1,9 +1,18 @@
 variables:
-  CI_IMAGE: quantumbrilliance/ci-ubuntu20.04:sdk-beta-18
+  CI_IMAGE: registry.gitlab.com/qbau/software-and-apps/ci-dockerfiles/ubuntu-22.04:sdk-1
 
 stages:
   - build
   - test
+
+# Switch between merge request and branch pipelines.
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "pipeline"
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    - if: $CI_COMMIT_BRANCH
 
 .install_core:
   before_script:
@@ -11,12 +20,12 @@ stages:
     - echo $PWD
     - ls *
     - export ARTEFACTS_DIR=$PWD/../core
-    # The state of the runner is persistent outside the working dir, do delete any previous core dirs.
+    # The state of the runner is persistent outside the working dir, so delete any previous core dirs.
     - rm -rf $ARTEFACTS_DIR $QB_DIR/core-local
     - mv core_artefacts $ARTEFACTS_DIR
     - cmake --install $ARTEFACTS_DIR/build
 
-ubuntu20-build-triggered-from-upstream:
+ci-build-triggered-from-upstream:
   stage: build
   image: $CI_IMAGE
   extends: .install_core
@@ -26,7 +35,7 @@ ubuntu20-build-triggered-from-upstream:
     - if: $CI_PIPELINE_SOURCE == "pipeline"
   needs:
     - project: qbau/software-and-apps/core
-      job: ubuntu20-build
+      job: ci-build
       ref: $UPSTREAM_REF
       artifacts: true
   script:
@@ -43,7 +52,7 @@ ubuntu20-build-triggered-from-upstream:
       - decoder
       - integrations
 
-ubuntu20-tests-triggered-from-upstream:
+ci-tests-triggered-from-upstream:
   stage: test
   extends: .install_core
   image: $CI_IMAGE
@@ -52,9 +61,9 @@ ubuntu20-tests-triggered-from-upstream:
   rules:
     - if: $CI_PIPELINE_SOURCE == "pipeline"
   needs:
-    - "ubuntu20-build-triggered-from-upstream"
+    - "ci-build-triggered-from-upstream"
     - project: qbau/software-and-apps/core
-      job: ubuntu20-build
+      job: ci-build
       ref: $UPSTREAM_REF
       artifacts: true
   script:
@@ -72,7 +81,7 @@ ubuntu20-tests-triggered-from-upstream:
     - rm -rf $QB_DIR/core $QB_DIR/core-local
     - rm -rf $QB_DIR/core $QB_DIR/qristal
 
-ubuntu20-build-triggered-locally:
+ci-build-triggered-locally:
   stage: build
   image: $CI_IMAGE
   extends: .install_core
@@ -82,7 +91,7 @@ ubuntu20-build-triggered-locally:
     - if: $CI_PIPELINE_SOURCE != "pipeline"
   needs:
     - project: qbau/software-and-apps/core
-      job: ubuntu20-build
+      job: ci-build
       ref: main
       artifacts: true
   script:
@@ -98,7 +107,7 @@ ubuntu20-build-triggered-locally:
       - decoder
       - integrations
 
-ubuntu20-tests-triggered-locally:
+ci-tests-triggered-locally:
   stage: test
   extends: .install_core
   image: $CI_IMAGE
@@ -107,9 +116,9 @@ ubuntu20-tests-triggered-locally:
   rules:
     - if: $CI_PIPELINE_SOURCE != "pipeline"
   needs:
-    - "ubuntu20-build-triggered-locally"
+    - "ci-build-triggered-locally"
     - project: qbau/software-and-apps/core
-      job: ubuntu20-build
+      job: ci-build
       ref: main
       artifacts: true
   script:
