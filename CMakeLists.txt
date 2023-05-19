@@ -5,9 +5,9 @@ set(MIN_CMAKE_VERSION 3.20)
 cmake_minimum_required(VERSION ${MIN_CMAKE_VERSION} FATAL_ERROR)
 
 # Dependencies
-set(CORE_VERSION          "0.3.0")
-set(INTEGRATIONS_VERSION  "0.3.0")
-set(DECODER_VERSION       "0.3.0")
+set(CORE_VERSION          "1.0.0")
+set(INTEGRATIONS_VERSION  "1.0.0")
+set(DECODER_VERSION       "1.0.0")
 
 if(NOT DEFINED CORE_TAG)
   set(CORE_TAG v${CORE_VERSION})
