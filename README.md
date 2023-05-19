@@ -8,22 +8,17 @@ QB Qristal can be installed directly from source or via a pre-built Docker image
 
 ### Docker
 
-Two Docker images are provided in the GitLab container registry associated with the SDK repository.  One is the regular Qristal image, and the other also includes a pre-configured CUDA Quantum installation.
+A Docker image is provided in the GitLab container registry associated with the SDK repository.
 
 Depending on how you have set up Docker on your system, you may or may not need to run the following commands as root.
 
 1. Start the QB Qristal container
-
-The regular container can be started with
 ```
 docker run --rm -it --name qbsdk -d -p 8889:8889 registry.gitlab.com/qbau/software-and-apps/public/qbsdk
 ```
-If your system has one or more NVIDIA GPUs, you can instead install the [NVIDIA Container Toolkit](https://github.com/NVIDIA/nvidia-docker) and launch the image with CUDA Quantum included, using
-```
-docker run --rm -it --name qbsdk --gpus all -d -p 8889:8889 registry.gitlab.com/qbau/software-and-apps/public/qbsdk:cudaq
-```
+If your system has one or more NVIDIA GPUs, install the [NVIDIA Container Toolkit](https://github.com/NVIDIA/nvidia-docker) and add the switch `--gpus all` to the `docker run` command in order to use them.
 
-Either of these commands will start a container and map its TCP port 8889 to the same port on the Docker host (your computer).
+This command will start a container and map its TCP port 8889 to the same port on the Docker host (your computer).
 
 From your web browser, you can access a JupyterLab environment at http://localhost:8889 to view Python examples and start prototyping with QB Qristal.
 
