@@ -102,7 +102,7 @@ if (NOT qbcore_FOUND)
       "TNQVM_ROOT ${TNQVM_ROOT}"
       "WITH_TKET ${WITH_TKET}"
       "TKET_DIR ${TKET_DIR}"
-      "QB_BUILD_DOCS ${QB_BUILD_DOCS}"
+      "BUILD_DOCS ${BUILD_DOCS}"
       "WARNINGS ${WARNINGS}"
   )
   include(CMakeFindDependencyMacro)
