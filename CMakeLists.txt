@@ -52,9 +52,6 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT OR NOT DEFINED CMAKE_INSTALL_PREF
 endif()
 message(STATUS "Installation directory for ${PROJECT_NAME} set to ${CMAKE_INSTALL_PREFIX}.")
 
-# Set default RPATH to the lib dir of the installation dir.
-set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib CACHE PATH "Search path for shared libraries to encode into binaries." FORCE)
-
 # Work out build type
 set(CMAKE_BUILD_TYPE "None" CACHE STRING "Type of build: None, Release, Debug, RelWithDebInfo or MinSizeRel." FORCE)
 set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "None" "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
@@ -110,6 +107,9 @@ if (NOT qbcore_FOUND)
   set(qbcore_DIR ${core_SOURCE_DIR})
 
 endif()
+
+# Set default RPATH to the lib dir of the installation dir.
+set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${qbcore_LIBDIR} CACHE PATH "Search path for shared libraries to encode into binaries." FORCE)
 
 # Get the integrations library
 CPMAddPackage(
