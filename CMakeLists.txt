@@ -128,6 +128,8 @@ CPMAddPackage(
   OPTIONS
     "CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}"
     "WARNINGS ${WARNINGS}"
+    "qbcore_LIBDIR ${qbcore_LIBDIR}"
+    "XACC_ROOT ${XACC_ROOT}"
     "SKIP_FIND_CORE ON"
     "qbcore_FOUND ON"
 )
