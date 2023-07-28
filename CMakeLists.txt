@@ -102,7 +102,9 @@ if (NOT qbcore_FOUND)
       "BUILD_DOCS ${BUILD_DOCS}"
       "WARNINGS ${WARNINGS}"
   )
-  set(qbcore_LIBDIR ${CMAKE_INSTALL_LIBDIR})
+  include(CMakeFindDependencyMacro)
+  include(${core_BINARY_DIR}/afterCPMAddPackage.cmake)
+  set(qbcore_DIR ${core_SOURCE_DIR})
 
 endif()
 
@@ -128,10 +130,9 @@ CPMAddPackage(
   OPTIONS
     "CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}"
     "WARNINGS ${WARNINGS}"
-    "qbcore_LIBDIR ${qbcore_LIBDIR}"
-    "XACC_ROOT ${XACC_ROOT}"
     "SKIP_FIND_CORE ON"
     "qbcore_FOUND ON"
+    "qbcore_DIR ${qbcore_DIR}"
 )
 
 # Install the readme and exercises
