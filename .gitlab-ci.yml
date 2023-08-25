@@ -81,7 +81,19 @@ ci-tests-triggered-from-upstream:
     - rm -rf $QB_DIR/core $QB_DIR/core-local
     - rm -rf $QB_DIR/core $QB_DIR/qristal
 
-ci-build-triggered-locally:
+ci-build-triggered-locally-tags:
+  stage: build
+  image: $CI_IMAGE
+  tags: 
+    - docker-heavy
+  rules:
+    - if: $CI_PIPELINE_SOURCE != "pipeline"
+  script:
+    - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com".insteadOf https://gitlab.com
+    - cmake -B build . -DINSTALL_MISSING=ON -DCMAKE_INSTALL_PREFIX=$QB_DIR/qristal --preset=dev
+    - cmake --build build
+
+ci-build-triggered-locally-mains:
   stage: build
   image: $CI_IMAGE
   extends: .install_core
@@ -107,7 +119,7 @@ ci-build-triggered-locally:
       - decoder
       - integrations
 
-ci-tests-triggered-locally:
+ci-tests-triggered-locally-mains:
   stage: test
   extends: .install_core
   image: $CI_IMAGE
@@ -116,7 +128,7 @@ ci-tests-triggered-locally:
   rules:
     - if: $CI_PIPELINE_SOURCE != "pipeline"
   needs:
-    - "ci-build-triggered-locally"
+    - "ci-build-triggered-locally-mains"
     - project: qbau/software-and-apps/core
       job: ci-build
       ref: main
