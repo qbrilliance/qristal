@@ -46,29 +46,29 @@ docker stop qbsdk
 
 **Prerequisites**
 
-As of this beta release, only Linux (e.g., Ubuntu) is supported.
+As of this release, only Linux (e.g., Ubuntu) is supported. One may also choose to use Ubuntu with WSL 2 ([Windows Subsystem for Linux](https://learn.microsoft.com/en-us/windows/wsl/)) installed, as the installation sequence is the same. The best performance is achieved with regular Linux, due to additional overhead coming from the Windows filesystem. Please ensure if using WSL that you turn on file system case sensitivity for the location where you intend to install Qristal.
 
 At a minimum, the following packages are required:
 
 - Python3.8+
 
-- gcc, g++, and gfortran (version 7+).  Usage of clang is supported, but gcc/g++ is still required for building exatn and tnqvm.
+- gcc, g++, and gfortran 11.4.0 or later.  Usage of clang 16.0.0 or later is supported, but gcc/g++ is still required for building exatn and tnqvm.
 
 - cmake (version 3.20+)
-
-- Eigen 3.4+
 
 - Boost 1.71+
 
 - OpenBLAS
 
+- OpenSSL
+
 - Curl
 
 
-For example, on Debian-based distributions (e.g., Ubuntu), we can use `apt` to install all above prerequisites:
+For example, on the latest Debian-based distributions (e.g. Ubuntu 22.04 or above), we can use `apt` to install all above prerequisites. 
 
 ```
-sudo apt install build-essential cmake gfortran libboost-all-dev libcurl4-openssl-dev  libeigen3-dev libopenblas-dev libpython3-dev python3 python3-pip
+sudo apt install build-essential cmake gfortran libboost-all-dev libcurl4-openssl-dev libssl-dev libopenblas-dev libpython3-dev python3 python3-pip
 ```
 
 Qristal will be built with support for CUDA Quantum if and only if cmake detects that your system has a compatible CUDA Quantum installation.

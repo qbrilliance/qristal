@@ -1,5 +1,5 @@
 variables:
-  CI_IMAGE: registry.gitlab.com/qbau/software-and-apps/ci-dockerfiles/ubuntu-22.04:sdk-3
+  CI_IMAGE: registry.gitlab.com/qbau/software-and-apps/ci-dockerfiles/ubuntu-22.04:sdk-4
 
 stages:
   - build
