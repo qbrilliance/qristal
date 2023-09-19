@@ -1,9 +1,19 @@
 variables:
-  CI_IMAGE: registry.gitlab.com/qbau/software-and-apps/ci-dockerfiles/ubuntu-22.04:sdk-4
+  CI_IMAGE:                 registry.gitlab.com/qbau/software-and-apps/ci-dockerfiles/ubuntu-22.04:sdk-4
+  EMULATOR_CI_IMAGE_CLANG:  registry.gitlab.com/qbau/software-and-apps/ci-dockerfiles/ubuntu-22.04:emulator-clang-6
+  DEV_REGISTRY:             registry.gitlab.com/qbau/software-and-apps/qbsdk
+  PUBLIC_REGISTRY:          registry.gitlab.com/qbau/software-and-apps/public/qbsdk
+  STAGING_REGISTRY:         $DEV_REGISTRY/staging
+  DEV_IMAGE_NAME:           qristal-sdk-dev
+  PUBLIC_IMAGE_NAME:        qristal-sdk
+  N_PROC: "0"
+
 
 stages:
   - build
   - test
+  - prepare_image
+  - deploy_image
 
 # Switch between merge request and branch pipelines.
 workflow:
@@ -81,19 +91,7 @@ ci-tests-triggered-from-upstream:
     - rm -rf $QB_DIR/core $QB_DIR/core-local
     - rm -rf $QB_DIR/core $QB_DIR/qristal
 
-ci-build-triggered-locally-tags:
-  stage: build
-  image: $CI_IMAGE
-  tags: 
-    - docker-heavy
-  rules:
-    - if: $CI_PIPELINE_SOURCE != "pipeline"
-  script:
-    - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com".insteadOf https://gitlab.com
-    - cmake -B build . -DINSTALL_MISSING=ON -DCMAKE_INSTALL_PREFIX=$QB_DIR/qristal --preset=dev
-    - cmake --build build
-
-ci-build-triggered-locally-mains:
+ci-build-triggered-locally-tips-of-all-mains:
   stage: build
   image: $CI_IMAGE
   extends: .install_core
@@ -119,7 +117,7 @@ ci-build-triggered-locally-mains:
       - decoder
       - integrations
 
-ci-tests-triggered-locally-mains:
+ci-tests-triggered-locally-tips-of-all-mains:
   stage: test
   extends: .install_core
   image: $CI_IMAGE
@@ -128,7 +126,7 @@ ci-tests-triggered-locally-mains:
   rules:
     - if: $CI_PIPELINE_SOURCE != "pipeline"
   needs:
-    - "ci-build-triggered-locally-mains"
+    - "ci-build-triggered-locally-tips-of-all-mains"
     - project: qbau/software-and-apps/core
       job: ci-build
       ref: main
@@ -146,3 +144,144 @@ ci-tests-triggered-locally-mains:
     - python3 $QB_DIR/qristal/examples/python/vqee_example_1.py
     - rm -rf $QB_DIR/core $QB_DIR/core-local
     - rm -rf $QB_DIR/core $QB_DIR/qristal
+
+ci-build-triggered-locally-install-missing:
+  stage: build
+  image: $CI_IMAGE
+  tags: 
+    - docker-heavy
+  parallel:
+    matrix:
+      - QBSDK_PRESET: ["dev", "public"]
+  rules:
+    # Allow skipping the build step using public core, integrations and decoder repos.
+    - if: $CI_PIPELINE_SOURCE != "pipeline" && $QBSDK_PRESET == "public"
+      when: manual
+      allow_failure: true
+    - if: $CI_PIPELINE_SOURCE != "pipeline"
+  script:
+    - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com".insteadOf https://gitlab.com
+    - cmake -B build . -DINSTALL_MISSING=ON -DCMAKE_INSTALL_PREFIX=$QB_DIR/qristal --preset=$QBSDK_PRESET
+    - cmake --build build
+
+# - - - - - - - - - - - - - - - - - - - SDK images - - - - - - - - - - - - - - - - - - - #
+
+# Build the SDK images
+build-image:
+  stage: prepare_image
+  tags: ["lambda"]
+  needs: []
+  parallel:
+    matrix:
+      - QBSDK_PRESET: ["dev", "public"]
+  script:
+    # For the final public image built on the main, use the latest tagged commits on all repos, and name the image using the latest SDK tag.
+    # For the dev images and the public image deployed to staging from merge requests, use the tips of all mains, and name the image using today's date. 
+    - export SDK_TAG=$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
+    - export CORE_TAG=main
+    - export IM_TAG=$IMAGE:$(date -I)
+    - if [ "$CI_PIPELINE_SOURCE" != "merge_request_event" ]; then
+    -   if [ $QBSDK_PRESET = "dev" ]; then
+    -     export SDK_TAG=$CI_COMMIT_BRANCH
+    -   else
+    -     export GIT_TAG=$(git describe --tags --abbrev=0)
+    -     export SDK_TAG=$GIT_TAG
+    -     export CORE_TAG=$GIT_TAG
+    -     export IM_TAG=$IMAGE:$GIT_TAG
+    -   fi
+    - fi
+    # Make the image tag available to the deploy job.
+    - echo "IM_TAG=$IM_TAG" >> im_tag.env
+    - echo -e "Running job with IM_TAG ${IM_TAG}, QBSDK_PRESET ${QBSDK_PRESET}, SDK_TAG ${SDK_TAG}"
+    - df -h
+    #- bash utils/checkBump.sh $IM_TAG
+    - docker buildx build 
+      --build-arg SDK_CI_IMAGE=$EMULATOR_CI_IMAGE_CLANG 
+      --build-arg N_PROC=$N_PROC 
+      --build-arg GIT_TOKEN=${CI_JOB_TOKEN} 
+      --build-arg QBSDK_PRESET=${QBSDK_PRESET}
+      --build-arg CORE_TAG=${CORE_TAG}
+      --build-arg DECODER_TAG=${CORE_TAG}
+      --build-arg INTEGRATIONS_TAG=${CORE_TAG}
+      --build-arg QBSDK_TAG=${SDK_TAG} 
+      --rm --platform linux/amd64 --progress=plain --target deploy -t $IM_TAG -f docker/Dockerfile .
+  rules:
+    # Skipping the public image build step is allowed, but not the dev one.
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $QBSDK_PRESET == "dev"
+      variables:
+        IMAGE: $STAGING_REGISTRY/$DEV_IMAGE_NAME
+    - if: $CI_COMMIT_BRANCH == "main" && $QBSDK_PRESET == "dev"
+      variables:
+        IMAGE: $DEV_REGISTRY/$DEV_IMAGE_NAME
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $QBSDK_PRESET == "public"
+      variables:
+        IMAGE: $STAGING_REGISTRY/$PUBLIC_IMAGE_NAME
+      when: manual
+      allow_failure: true
+    - if: $CI_COMMIT_BRANCH == "main" && $QBSDK_PRESET == "public"
+      variables:
+        IMAGE: $PUBLIC_REGISTRY/$PUBLIC_IMAGE_NAME
+      when: manual
+      allow_failure: true
+  artifacts:
+    reports:
+      dotenv: im_tag.env
+
+# Deploy the development image      
+deploy-dev-image:
+  stage: deploy_image
+  needs: 
+    job: build-image
+    parallel:
+      matrix:
+        - QBSDK_PRESET: "dev"   
+  tags: ["lambda"]
+  script:
+    - echo -e "Running job with IM_TAG ${IM_TAG}"
+    - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER $CI_REGISTRY --password-stdin
+    - docker push --quiet $IM_TAG
+  rules:
+    # Skipping the deployment of the dev image is allowed in a merge, but not in the main.
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: manual
+      allow_failure: true
+    - if: $CI_PIPELINE_SOURCE != "pipeline" && $CI_COMMIT_BRANCH == "main"
+
+# Deploy the public image      
+deploy-public-image:
+  stage: deploy_image
+  # Deploying the public image is always manual
+  needs: 
+    job: build-image
+    parallel:
+      matrix:
+        - QBSDK_PRESET: "public"   
+  tags: ["lambda"]
+  script:
+    - echo -e "Running job with IM_TAG ${IM_TAG}"
+    - echo $GL_TOKEN | docker login -u $GL_USER $GL_REGISTRY --password-stdin
+    # Forbid overwriting already published public images 
+    - if [ "$CI_PIPELINE_SOURCE" != "merge_request_event" ]; then
+    -   docker manifest inspect ${IM_TAG} > /dev/null && echo Attempt to overwrite deployed public image ${IM_TAG}! && exit 1
+    - fi
+    - docker push --quiet $IM_TAG
+    # Now that we've successfully uploaded a new tagged image, overwrite the "latest" tag.
+    - docker tag $IM_TAG $LATEST_TAG
+    - docker push --quiet $LATEST_TAG
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      variables:
+        GL_USER: $CI_REGISTRY_USER
+        GL_TOKEN: $CI_REGISTRY_PASSWORD
+        GL_REGISTRY: $CI_REGISTRY
+        LATEST_TAG: $STAGING_REGISTRY/$PUBLIC_IMAGE_NAME:latest
+      when: manual
+      allow_failure: true
+    - if: $CI_PIPELINE_SOURCE != "pipeline" && $CI_COMMIT_BRANCH == "main"
+      variables:
+        GL_USER: $SDK_IMAGE_DEPLOYER_USERNAME
+        GL_TOKEN: $SDK_IMAGE_DEPLOYER_TOKEN
+        GL_REGISTRY: https://$PUBLIC_REGISTRY
+        LATEST_TAG: $PUBLIC_REGISTRY/$PUBLIC_IMAGE_NAME:latest
+      when: manual
+      allow_failure: true

@@ -14,7 +14,7 @@ Depending on how you have set up Docker on your system, you may or may not need 
 
 1. Start the QB Qristal container
 ```
-docker run --rm -it --name qbsdk -d -p 8889:8889 registry.gitlab.com/qbau/software-and-apps/public/qbsdk
+docker run --rm -it --name qristal -d -p 8889:8889 registry.gitlab.com/qbau/software-and-apps/public/qbsdk/qristal-sdk
 ```
 If your system has one or more NVIDIA GPUs, install the [NVIDIA Container Toolkit](https://github.com/NVIDIA/nvidia-docker) and add the switch `--gpus all` to the `docker run` command in order to use them.
 
@@ -29,17 +29,17 @@ After starting the container, besides the [JupyterLab environment](http://localh
 - For the terminal, run the following command to attach to a terminal session inside the container.
 
 ```
-docker exec -it qbsdk bash
+docker exec -it qristal bash
 ```
 
-- If you prefer to use VSCode, you can "attach" it to the  running `qbsdk` Docker container.
+- If you prefer to use VSCode, you can "attach" it to the  running `qristal` Docker container.
 
-To attach to the `qbsdk` Docker container, either select `Dev Containers: Attach to Running Container...` from the `Command Palette` (F1) or use the `Remote Explorer` in the `Activity Bar` and from the `Containers` view, select the `Attach to Container` inline action on the container. In both methods, a dropdown will appear; select the `qbsdk` container.
+To attach to the `qristal` Docker container, either select `Dev Containers: Attach to Running Container...` from the `Command Palette` (F1) or use the `Remote Explorer` in the `Activity Bar` and from the `Containers` view, select the `Attach to Container` inline action on the container. In both methods, a dropdown will appear; select the `qristal` container.
 
 3. Stop and remove the container
 
 ```
-docker stop qbsdk
+docker stop qristal
 ```
 
 ### Install from source
