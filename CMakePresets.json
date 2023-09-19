@@ -6,9 +6,9 @@
             "displayName": "Dev Config",
             "description": "Default CMake Configurations for internal QB Development",
             "cacheVariables": {
-                "QB_SDK_GITLAB_ORG": {
+                "QRISTAL_GIT_PREFIX": {
                     "type": "STRING",
-                    "value": "qbau/software-and-apps"
+                    "value": "https://gitlab.com/qbau/software-and-apps/"
                 }
             }
         },
@@ -17,9 +17,9 @@
             "displayName": "Public Config",
             "description": "Default CMake Configurations for public QB repositories",
             "cacheVariables": {
-                "QB_SDK_GITLAB_ORG": {
+                "QRISTAL_GIT_PREFIX": {
                     "type": "STRING",
-                    "value": "qbau/software-and-apps/public"
+                    "value": "https://github.com/qbrilliance/qristal-"
                 }
             }
         }

@@ -80,7 +80,7 @@ if (NOT qbcore_FOUND)
   endif()
 
   # Root Gitlab org. of SDK repos
-  set(QB_SDK_GITLAB_ORG qbau/software-and-apps/public CACHE STRING "QB SDK Gitlab group")
+  set(QRISTAL_GIT_PREFIX https://github.com/qbrilliance/qristal- CACHE STRING "Qristal repos git path prefix")
 
   # Get the core
   CPMAddPackage(
@@ -88,7 +88,7 @@ if (NOT qbcore_FOUND)
     VERSION ${CORE_VERSION}
     GIT_TAG ${CORE_TAG}
     GIT_SHALLOW False # Temporary (for rapid dev).
-    GITLAB_REPOSITORY ${QB_SDK_GITLAB_ORG}/core
+    GIT_REPOSITORY ${QRISTAL_GIT_PREFIX}core
     SOURCE_DIR ${PROJECT_SOURCE_DIR}/core
     OPTIONS
       "INSTALL_MISSING ${INSTALL_MISSING}"
@@ -116,7 +116,7 @@ CPMAddPackage(
   NAME integrations
   GIT_TAG ${INTEGRATIONS_TAG} # Temporary (for rapid dev).
   GIT_SHALLOW False # Temporary (for rapid dev).
-  GITLAB_REPOSITORY ${QB_SDK_GITLAB_ORG}/integrations
+  GIT_REPOSITORY ${QRISTAL_GIT_PREFIX}integrations
   SOURCE_DIR ${PROJECT_SOURCE_DIR}/integrations
 )
 
@@ -125,7 +125,7 @@ CPMAddPackage(
   NAME decoder
   GIT_TAG ${DECODER_TAG} # Temporary (for rapid dev).
   GIT_SHALLOW False # Temporary (for rapid dev).
-  GITLAB_REPOSITORY ${QB_SDK_GITLAB_ORG}/decoder
+  GIT_REPOSITORY ${QRISTAL_GIT_PREFIX}decoder
   SOURCE_DIR ${PROJECT_SOURCE_DIR}/decoder
   OPTIONS
     "CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}"
