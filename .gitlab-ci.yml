@@ -1,6 +1,6 @@
 variables:
   CI_IMAGE:                 registry.gitlab.com/qbau/software-and-apps/ci-dockerfiles/ubuntu-22.04:sdk-4
-  EMULATOR_CI_IMAGE_CLANG:  registry.gitlab.com/qbau/software-and-apps/ci-dockerfiles/ubuntu-22.04:emulator-clang-6
+  EMULATOR_CI_IMAGE_CLANG:  registry.gitlab.com/qbau/software-and-apps/ci-dockerfiles/ubuntu-22.04:emulator-clang-7
   DEV_REGISTRY:             registry.gitlab.com/qbau/software-and-apps/qbsdk
   PUBLIC_REGISTRY:          registry.gitlab.com/qbau/software-and-apps/public/qbsdk
   STAGING_REGISTRY:         $DEV_REGISTRY/staging
