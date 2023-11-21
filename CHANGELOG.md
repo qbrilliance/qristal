@@ -2,6 +2,13 @@
 
 Qristal is a full-stack SDK for quantum accelerators.  This is its top-level collector project.
 
+## [1.4.0] - 2023-11-20
+
+### Added
+
+- Multi-arch NVIDIA GPU support
+- PowerPC CPU support
+
 ## [1.3.0] - 2023-10-10
 
 ### Added
