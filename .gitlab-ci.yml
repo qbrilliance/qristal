@@ -51,7 +51,7 @@ ci-build-triggered-from-upstream:
   script:
     - echo Using core branch $UPSTREAM_REF
     - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com".insteadOf https://gitlab.com
-    - cmake -B build . -Dqbcore_DIR=${QB_DIR}/core-local -DCMAKE_INSTALL_PREFIX=$QB_DIR/qristal --preset=dev -DINTEGRATIONS_TAG=main -DDECODER_TAG=main
+    - cmake -B build . -Dqbcore_DIR=${QB_DIR}/core-local -DCMAKE_INSTALL_PREFIX=$QB_DIR/qristal --preset=dev -DINTEGRATIONS_TAG=main -DDECODER_TAG=add_core_dep
     - cmake --build build
     - rm -rf $QB_DIR/core $QB_DIR/core-local
   artifacts:
