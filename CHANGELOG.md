@@ -2,12 +2,20 @@
 
 Qristal is a full-stack SDK for quantum accelerators.  This is its top-level collector project.
 
+## [1.5.0] - 2024-02-21
+
+### Breaking
+
+- Increased minimum clang version from 16.0.0 to 16.0.6 for improved compatibility with CUDA Quantum
+
+
 ## [1.4.0] - 2023-11-20
 
 ### Added
 
 - Multi-arch NVIDIA GPU support
 - PowerPC CPU support
+
 
 ## [1.3.0] - 2023-10-10
 
