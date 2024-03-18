@@ -40,7 +40,7 @@ ci-build-triggered-from-upstream:
   image: $CI_IMAGE
   extends: .install_core
   tags: 
-    - docker-heavy
+    - x86Docker
   rules:
     - if: $CI_PIPELINE_SOURCE == "pipeline"
   needs:
@@ -67,7 +67,7 @@ ci-tests-triggered-from-upstream:
   extends: .install_core
   image: $CI_IMAGE
   tags: 
-    - docker-heavy
+    - x86Docker
   rules:
     - if: $CI_PIPELINE_SOURCE == "pipeline"
   needs:
@@ -96,7 +96,7 @@ ci-build-triggered-locally-tips-of-all-mains:
   image: $CI_IMAGE
   extends: .install_core
   tags: 
-    - docker-heavy
+    - x86Docker
   rules:
     - if: $CI_PIPELINE_SOURCE != "pipeline"
   needs:
@@ -122,7 +122,7 @@ ci-tests-triggered-locally-tips-of-all-mains:
   extends: .install_core
   image: $CI_IMAGE
   tags: 
-    - docker-heavy
+    - x86Docker
   rules:
     - if: $CI_PIPELINE_SOURCE != "pipeline"
   needs:
@@ -149,7 +149,7 @@ ci-build-triggered-locally-install-missing:
   stage: build
   image: $CI_IMAGE
   tags: 
-    - docker-heavy
+    - x86Docker
   parallel:
     matrix:
       - QBSDK_PRESET: ["dev", "public"]
