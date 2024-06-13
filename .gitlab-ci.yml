@@ -1,13 +1,18 @@
 variables:
-  CI_IMAGE:                 registry.gitlab.com/qbau/software-and-apps/ci-dockerfiles/ubuntu-22.04:sdk-5
-  EMULATOR_CI_IMAGE_CLANG:  registry.gitlab.com/qbau/software-and-apps/ci-dockerfiles/ubuntu-22.04:emulator-clang-10
+  CI_IMAGE:                 registry.gitlab.com/qbau/software-and-apps/ci-dockerfiles/ubuntu_x86-22.04:all_dep_clang-1
+  EMULATOR_CI_IMAGE_CLANG:  registry.gitlab.com/qbau/software-and-apps/ci-dockerfiles/ubuntu_x86-22.04:all_dep_cuda-12.1.1_clang-1
   DEV_REGISTRY:             registry.gitlab.com/qbau/software-and-apps/qbsdk
   PUBLIC_REGISTRY:          registry.gitlab.com/qbau/software-and-apps/public/qbsdk
   STAGING_REGISTRY:         $DEV_REGISTRY/staging
   DEV_IMAGE_NAME:           qristal-sdk-dev
   PUBLIC_IMAGE_NAME:        qristal-sdk
-  N_PROC: "0"
+  N_PROC_LAMBDA: "16"
 
+  # CORE_TAG specifies the branch to use for image builds e.g. "waseem/universal_dockerfile"
+  # CORE_REF specifies the reference to copy artifacts from e.g. "refs/merge-requests/209/head"
+  # default is "main"
+  CORE_TAG: main
+  CORE_REF: main
 
 stages:
   - build
@@ -31,7 +36,7 @@ workflow:
     - ls *
     - export ARTEFACTS_DIR=$PWD/../core
     # The state of the runner is persistent outside the working dir, so delete any previous core dirs.
-    - rm -rf $ARTEFACTS_DIR $QB_DIR/core-local
+    - rm -rf $ARTEFACTS_DIR $QB_DIR/core
     - mv core_artefacts $ARTEFACTS_DIR
     - cmake --install $ARTEFACTS_DIR/build
 
@@ -51,9 +56,9 @@ ci-build-triggered-from-upstream:
   script:
     - echo Using core branch $UPSTREAM_REF
     - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com".insteadOf https://gitlab.com
-    - cmake -B build . -Dqbcore_DIR=${QB_DIR}/core-local -DCMAKE_INSTALL_PREFIX=$QB_DIR/qristal --preset=dev -DINTEGRATIONS_TAG=main -DDECODER_TAG=main
+    - cmake -B build . -Dqbcore_DIR=${QB_DIR}/core -DCMAKE_INSTALL_PREFIX=$QB_DIR/qristal --preset=dev -DINTEGRATIONS_TAG=main -DDECODER_TAG=main
     - cmake --build build
-    - rm -rf $QB_DIR/core $QB_DIR/core-local
+    - rm -rf $WORK_DIR/core $QB_DIR/core
   artifacts:
     when: always
     paths:
@@ -88,8 +93,7 @@ ci-tests-triggered-from-upstream:
     - python3 $QB_DIR/qristal/examples/python/demo1.py
     - python3 $QB_DIR/qristal/examples/python/quickstart.py
     - python3 $QB_DIR/qristal/examples/python/vqee_example_1.py
-    - rm -rf $QB_DIR/core $QB_DIR/core-local
-    - rm -rf $QB_DIR/core $QB_DIR/qristal
+    - rm -rf $WORK_DIR/core $QB_DIR/core $QB_DIR/qristal
 
 ci-build-triggered-locally-tips-of-all-mains:
   stage: build
@@ -102,13 +106,13 @@ ci-build-triggered-locally-tips-of-all-mains:
   needs:
     - project: qbau/software-and-apps/core
       job: ci-build
-      ref: main
+      ref: $CORE_REF
       artifacts: true
   script:
     - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com".insteadOf https://gitlab.com
-    - cmake -B build . -Dqbcore_DIR=${QB_DIR}/core-local -DCMAKE_INSTALL_PREFIX=$QB_DIR/qristal --preset=dev -DINTEGRATIONS_TAG=main -DDECODER_TAG=main
+    - cmake -B build . -Dqbcore_DIR=${QB_DIR}/core -DCMAKE_INSTALL_PREFIX=$QB_DIR/qristal --preset=dev -DINTEGRATIONS_TAG=main -DDECODER_TAG=main
     - cmake --build build
-    - rm -rf $QB_DIR/core $QB_DIR/core-local
+    - rm -rf $WORK_DIR/core $QB_DIR/core
   artifacts:
     when: always
     paths:
@@ -129,7 +133,7 @@ ci-tests-triggered-locally-tips-of-all-mains:
     - "ci-build-triggered-locally-tips-of-all-mains"
     - project: qbau/software-and-apps/core
       job: ci-build
-      ref: main
+      ref: $CORE_REF
       artifacts: true
   script:
     - cmake --install build
@@ -142,8 +146,7 @@ ci-tests-triggered-locally-tips-of-all-mains:
     - python3 $QB_DIR/qristal/examples/python/demo1.py
     - python3 $QB_DIR/qristal/examples/python/quickstart.py
     - python3 $QB_DIR/qristal/examples/python/vqee_example_1.py
-    - rm -rf $QB_DIR/core $QB_DIR/core-local
-    - rm -rf $QB_DIR/core $QB_DIR/qristal
+    - rm -rf $WORK_DIR/core $QB_DIR/core $QB_DIR/qristal
 
 ci-build-triggered-locally-install-missing:
   stage: build
@@ -161,7 +164,7 @@ ci-build-triggered-locally-install-missing:
     - if: $CI_PIPELINE_SOURCE != "pipeline"
   script:
     - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com".insteadOf https://gitlab.com
-    - cmake -B build . -DINSTALL_MISSING=ON -DCMAKE_INSTALL_PREFIX=$QB_DIR/qristal --preset=$QBSDK_PRESET
+    - cmake -B build . -DINSTALL_MISSING=ON -DCMAKE_INSTALL_PREFIX=$QB_DIR/qristal --preset=$QBSDK_PRESET -DCORE_TAG=$CORE_TAG -DDECODER_TAG=$CORE_TAG -DINTEGRATIONS_TAG=$CORE_TAG
     - cmake --build build
 
 # - - - - - - - - - - - - - - - - - - - SDK images - - - - - - - - - - - - - - - - - - - #
@@ -178,7 +181,7 @@ build-image:
     # For the final public image built on the main, use the latest tagged commits on all repos, and name the image using the latest SDK tag.
     # For the dev images and the public image deployed to staging from merge requests, use the tips of all mains, and name the image using today's date. 
     - export SDK_TAG=$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
-    - export CORE_TAG=main
+    - export CORE_TAG_LOCAL=$CORE_TAG
     - export IM_TAG=$IMAGE:$(date -I)
     - if [ "$CI_PIPELINE_SOURCE" != "merge_request_event" ]; then
     -   if [ $QBSDK_PRESET = "dev" ]; then
@@ -186,23 +189,23 @@ build-image:
     -   else
     -     export GIT_TAG=$(git describe --tags --abbrev=0)
     -     export SDK_TAG=$GIT_TAG
-    -     export CORE_TAG=$GIT_TAG
+    -     export CORE_TAG_LOCAL=$GIT_TAG
     -     export IM_TAG=$IMAGE:$GIT_TAG
     -   fi
     - fi
     # Make the image tag available to the deploy job.
     - echo "IM_TAG=$IM_TAG" >> im_tag.env
-    - echo -e "Running job with IM_TAG ${IM_TAG}, QBSDK_PRESET ${QBSDK_PRESET}, SDK_TAG ${SDK_TAG}"
+    - echo -e "Running job with IM_TAG ${IM_TAG}, QBSDK_PRESET ${QBSDK_PRESET}, CORE_TAG ${CORE_TAG_LOCAL}, SDK_TAG ${SDK_TAG}"
     - df -h
     #- bash utils/checkBump.sh $IM_TAG
     - docker buildx build 
       --build-arg SDK_CI_IMAGE=$EMULATOR_CI_IMAGE_CLANG 
-      --build-arg N_PROC=$N_PROC 
+      --build-arg N_PROC=$N_PROC_LAMBDA
       --build-arg GIT_TOKEN=${CI_JOB_TOKEN} 
       --build-arg QBSDK_PRESET=${QBSDK_PRESET}
-      --build-arg CORE_TAG=${CORE_TAG}
-      --build-arg DECODER_TAG=${CORE_TAG}
-      --build-arg INTEGRATIONS_TAG=${CORE_TAG}
+      --build-arg CORE_TAG=${CORE_TAG_LOCAL}
+      --build-arg DECODER_TAG=${CORE_TAG_LOCAL}
+      --build-arg INTEGRATIONS_TAG=${CORE_TAG_LOCAL}
       --build-arg QBSDK_TAG=${SDK_TAG} 
       --rm --platform linux/amd64 --progress=plain --target deploy -t $IM_TAG -f docker/Dockerfile .
   rules:
