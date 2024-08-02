@@ -70,13 +70,13 @@ endif()
 include(${CPM_DOWNLOAD_LOCATION})
 
 # Find the core
-find_package(qbcore ${CORE_VERSION} QUIET)
+find_package(qristal_core ${CORE_VERSION} QUIET)
 
 # Try to install the core if it wasn't found.
-if (NOT qbcore_FOUND)
+if (NOT qristal_core_FOUND)
 
   if (NOT INSTALL_MISSING)
-    message(FATAL_ERROR "Could not find core ${CORE_VERSION}. Please set qbcore_DIR to its installed location, or pass -DINSTALL_MISSING=ON (or =CXX or =PYTHON).")
+    message(FATAL_ERROR "Could not find core ${CORE_VERSION}. Please set qristal_core_DIR to its installed location, or pass -DINSTALL_MISSING=ON (or =CXX or =PYTHON).")
   endif()
 
   # Root Gitlab org. of SDK repos
@@ -104,12 +104,12 @@ if (NOT qbcore_FOUND)
   )
   include(CMakeFindDependencyMacro)
   include(${core_BINARY_DIR}/afterCPMAddPackage.cmake)
-  set(qbcore_DIR ${core_SOURCE_DIR})
+  set(qristal_core_DIR ${core_SOURCE_DIR})
 
 endif()
 
 # Set default RPATH to the lib dir of the installation dir.
-set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${qbcore_LIBDIR} CACHE PATH "Search path for shared libraries to encode into binaries." FORCE)
+set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${qristal_core_LIBDIR} CACHE PATH "Search path for shared libraries to encode into binaries." FORCE)
 
 # Get the integrations library
 CPMAddPackage(
@@ -131,8 +131,8 @@ CPMAddPackage(
     "CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}"
     "WARNINGS ${WARNINGS}"
     "SKIP_FIND_CORE ON"
-    "qbcore_FOUND ON"
-    "qbcore_DIR ${qbcore_DIR}"
+    "qristal_core_FOUND ON"
+    "qristal_core_DIR ${qristal_core_DIR}"
 )
 
 # Install the readme and exercises
@@ -147,11 +147,11 @@ install(
 )
 
 # If the core was found elsewhere, create symlinks to all the installed content
-if (qbcore_FOUND)
-  file(GLOB_RECURSE CORE_INSTALL_FILES RELATIVE ${qbcore_DIR} ${qbcore_DIR}/*)
+if (qristal_core_FOUND)
+  file(GLOB_RECURSE CORE_INSTALL_FILES RELATIVE ${qristal_core_DIR} ${qristal_core_DIR}/*)
   foreach(installed_file ${CORE_INSTALL_FILES})
     cmake_path(GET installed_file PARENT_PATH path)
     install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_INSTALL_PREFIX}/${path})")
-    install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ${qbcore_DIR}/${installed_file} ${CMAKE_INSTALL_PREFIX}/${installed_file})")
+    install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ${qristal_core_DIR}/${installed_file} ${CMAKE_INSTALL_PREFIX}/${installed_file})")
   endforeach()
 endif()

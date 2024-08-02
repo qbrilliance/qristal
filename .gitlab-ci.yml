@@ -13,6 +13,8 @@ variables:
   # default is "main"
   CORE_TAG: main
   CORE_REF: main
+  DECODER_TAG: main
+  INTEGRATIONS_TAG: main
 
 stages:
   - build
@@ -44,7 +46,7 @@ ci-build-triggered-from-upstream:
   stage: build
   image: $CI_IMAGE
   extends: .install_core
-  tags: 
+  tags:
     - x86Docker
   rules:
     - if: $CI_PIPELINE_SOURCE == "pipeline"
@@ -56,7 +58,7 @@ ci-build-triggered-from-upstream:
   script:
     - echo Using core branch $UPSTREAM_REF
     - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com".insteadOf https://gitlab.com
-    - cmake -B build . -Dqbcore_DIR=${QB_DIR}/core -DCMAKE_INSTALL_PREFIX=$QB_DIR/qristal --preset=dev -DINTEGRATIONS_TAG=main -DDECODER_TAG=main
+    - cmake -B build . -Dqristal_core_DIR=${QB_DIR}/core -DCMAKE_INSTALL_PREFIX=$QB_DIR/qristal --preset=dev -DINTEGRATIONS_TAG=$INTEGRATIONS_TAG -DDECODER_TAG=$DECODER_TAG
     - cmake --build build
     - rm -rf $WORK_DIR/core $QB_DIR/core
   artifacts:
@@ -71,7 +73,7 @@ ci-tests-triggered-from-upstream:
   stage: test
   extends: .install_core
   image: $CI_IMAGE
-  tags: 
+  tags:
     - x86Docker
   rules:
     - if: $CI_PIPELINE_SOURCE == "pipeline"
@@ -99,7 +101,7 @@ ci-build-triggered-locally-tips-of-all-mains:
   stage: build
   image: $CI_IMAGE
   extends: .install_core
-  tags: 
+  tags:
     - x86Docker
   rules:
     - if: $CI_PIPELINE_SOURCE != "pipeline"
@@ -110,7 +112,7 @@ ci-build-triggered-locally-tips-of-all-mains:
       artifacts: true
   script:
     - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com".insteadOf https://gitlab.com
-    - cmake -B build . -Dqbcore_DIR=${QB_DIR}/core -DCMAKE_INSTALL_PREFIX=$QB_DIR/qristal --preset=dev -DINTEGRATIONS_TAG=main -DDECODER_TAG=main
+    - cmake -B build . -Dqristal_core_DIR=${QB_DIR}/core -DCMAKE_INSTALL_PREFIX=$QB_DIR/qristal --preset=dev -DINTEGRATIONS_TAG=$INTEGRATIONS_TAG -DDECODER_TAG=$DECODER_TAG
     - cmake --build build
     - rm -rf $WORK_DIR/core $QB_DIR/core
   artifacts:
@@ -125,7 +127,7 @@ ci-tests-triggered-locally-tips-of-all-mains:
   stage: test
   extends: .install_core
   image: $CI_IMAGE
-  tags: 
+  tags:
     - x86Docker
   rules:
     - if: $CI_PIPELINE_SOURCE != "pipeline"
@@ -151,7 +153,7 @@ ci-tests-triggered-locally-tips-of-all-mains:
 ci-build-triggered-locally-install-missing:
   stage: build
   image: $CI_IMAGE
-  tags: 
+  tags:
     - x86Docker
   parallel:
     matrix:
@@ -164,7 +166,7 @@ ci-build-triggered-locally-install-missing:
     - if: $CI_PIPELINE_SOURCE != "pipeline"
   script:
     - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com".insteadOf https://gitlab.com
-    - cmake -B build . -DINSTALL_MISSING=ON -DCMAKE_INSTALL_PREFIX=$QB_DIR/qristal --preset=$QBSDK_PRESET -DCORE_TAG=$CORE_TAG -DDECODER_TAG=$CORE_TAG -DINTEGRATIONS_TAG=$CORE_TAG
+    - cmake -B build . -DINSTALL_MISSING=ON -DCMAKE_INSTALL_PREFIX=$QB_DIR/qristal --preset=$QBSDK_PRESET -DCORE_TAG=$CORE_TAG -DINTEGRATIONS_TAG=$INTEGRATIONS_TAG -DDECODER_TAG=$DECODER_TAG
     - cmake --build build
 
 # - - - - - - - - - - - - - - - - - - - SDK images - - - - - - - - - - - - - - - - - - - #
@@ -179,9 +181,11 @@ build-image:
       - QBSDK_PRESET: ["dev", "public"]
   script:
     # For the final public image built on the main, use the latest tagged commits on all repos, and name the image using the latest SDK tag.
-    # For the dev images and the public image deployed to staging from merge requests, use the tips of all mains, and name the image using today's date. 
+    # For the dev images and the public image deployed to staging from merge requests, use the tips of all mains, and name the image using today's date.
     - export SDK_TAG=$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
     - export CORE_TAG_LOCAL=$CORE_TAG
+    - export DECODER_TAG_LOCAL=$DECODER_TAG
+    - export INTEGRATIONS_TAG_LOCAL=$INTEGRATIONS_TAG
     - export IM_TAG=$IMAGE:$(date -I)
     - if [ "$CI_PIPELINE_SOURCE" != "merge_request_event" ]; then
     -   if [ $QBSDK_PRESET = "dev" ]; then
@@ -190,6 +194,8 @@ build-image:
     -     export GIT_TAG=$(git describe --tags --abbrev=0)
     -     export SDK_TAG=$GIT_TAG
     -     export CORE_TAG_LOCAL=$GIT_TAG
+    -     export DECODER_TAG_LOCAL=$GIT_TAG
+    -     export INTEGRATIONS_TAG_LOCAL=$GIT_TAG
     -     export IM_TAG=$IMAGE:$GIT_TAG
     -   fi
     - fi
@@ -198,15 +204,15 @@ build-image:
     - echo -e "Running job with IM_TAG ${IM_TAG}, QBSDK_PRESET ${QBSDK_PRESET}, CORE_TAG ${CORE_TAG_LOCAL}, SDK_TAG ${SDK_TAG}"
     - df -h
     #- bash utils/checkBump.sh $IM_TAG
-    - docker buildx build 
-      --build-arg SDK_CI_IMAGE=$EMULATOR_CI_IMAGE_CLANG 
+    - docker buildx build
+      --build-arg SDK_CI_IMAGE=$EMULATOR_CI_IMAGE_CLANG
       --build-arg N_PROC=$N_PROC_LAMBDA
-      --build-arg GIT_TOKEN=${CI_JOB_TOKEN} 
+      --build-arg GIT_TOKEN=${CI_JOB_TOKEN}
       --build-arg QBSDK_PRESET=${QBSDK_PRESET}
       --build-arg CORE_TAG=${CORE_TAG_LOCAL}
-      --build-arg DECODER_TAG=${CORE_TAG_LOCAL}
-      --build-arg INTEGRATIONS_TAG=${CORE_TAG_LOCAL}
-      --build-arg QBSDK_TAG=${SDK_TAG} 
+      --build-arg DECODER_TAG=${DECODER_TAG_LOCAL}
+      --build-arg INTEGRATIONS_TAG=${INTEGRATIONS_TAG_LOCAL}
+      --build-arg QBSDK_TAG=${SDK_TAG}
       --rm --platform linux/amd64 --progress=plain --target deploy -t $IM_TAG -f docker/Dockerfile .
   rules:
     # Skipping the public image build step is allowed, but not the dev one.
@@ -230,14 +236,14 @@ build-image:
     reports:
       dotenv: im_tag.env
 
-# Deploy the development image      
+# Deploy the development image
 deploy-dev-image:
   stage: deploy_image
-  needs: 
+  needs:
     job: build-image
     parallel:
       matrix:
-        - QBSDK_PRESET: "dev"   
+        - QBSDK_PRESET: "dev"
   tags: ["lambda"]
   script:
     - echo -e "Running job with IM_TAG ${IM_TAG}"
@@ -250,20 +256,20 @@ deploy-dev-image:
       allow_failure: true
     - if: $CI_PIPELINE_SOURCE != "pipeline" && $CI_COMMIT_BRANCH == "main"
 
-# Deploy the public image      
+# Deploy the public image
 deploy-public-image:
   stage: deploy_image
   # Deploying the public image is always manual
-  needs: 
+  needs:
     job: build-image
     parallel:
       matrix:
-        - QBSDK_PRESET: "public"   
+        - QBSDK_PRESET: "public"
   tags: ["lambda"]
   script:
     - echo -e "Running job with IM_TAG ${IM_TAG}"
     - echo $GL_TOKEN | docker login -u $GL_USER $GL_REGISTRY --password-stdin
-    # Forbid overwriting already published public images 
+    # Forbid overwriting already published public images
     - if [ "$CI_PIPELINE_SOURCE" != "merge_request_event" ]; then
     -   docker manifest inspect ${IM_TAG} > /dev/null && echo Attempt to overwrite deployed public image ${IM_TAG}! && exit 1
     - fi
