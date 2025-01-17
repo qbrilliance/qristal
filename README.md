@@ -13,7 +13,7 @@ A Docker image is provided in the GitLab container registry associated with the 
 Depending on how you have set up Docker on your system, you may or may not need to run the following commands as root.
 
 1. Start the QB Qristal container
-```
+```sh
 docker run --rm -it --name qristal -d -p 8889:8889 registry.gitlab.com/qbau/software-and-apps/public/qbsdk/qristal-sdk
 ```
 If your system has one or more NVIDIA GPUs, install the [NVIDIA Container Toolkit](https://github.com/NVIDIA/nvidia-docker) and add the switch `--gpus all` to the `docker run` command in order to use them.
@@ -28,7 +28,7 @@ After starting the container, besides the [JupyterLab environment](http://localh
 
 - For the terminal, run the following command to attach to a terminal session inside the container.
 
-```
+```sh
 docker exec -it qristal bash
 ```
 
@@ -38,7 +38,7 @@ To attach to the `qristal` Docker container, either select `Dev Containers: Atta
 
 3. Stop and remove the container
 
-```
+```sh
 docker stop qristal
 ```
 
@@ -67,7 +67,7 @@ Before building Qristal, you must have the following packages already installed 
 
 For example, on Ubuntu 22.04, you can use `apt` to install all of the above:
 
-```
+```sh
 sudo apt install build-essential cmake gfortran libboost-all-dev libcurl4-openssl-dev libssl-dev libopenblas-dev libpython3-dev python3 python3-pip
 ```
 
@@ -79,7 +79,7 @@ Qristal will be built with support for CUDA Quantum if and only if cmake detects
 
 After cloning the Qristal SDK repository, compile and install it with
 
-```
+```sh
 mkdir build && cd build
 cmake .. -DINSTALL_MISSING=ON
 make -j$(nproc) install
@@ -103,7 +103,7 @@ When using QB Qristal, a user workflow normally consists of the following steps:
 
 Here is an example of the entire workflow:
 
-```
+```python
 # Import the core of the QB SDK
 import qb.core
 
@@ -147,7 +147,7 @@ print("Results:\n", my_sim.out_raw[0][0])
 
 If you run the example, you will get an output similar to the following (right-hand values will both be around 50):
 
-```
+```sh
 About to run quantum program...
 Ran successfully!
 Results:
