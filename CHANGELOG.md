@@ -4,6 +4,10 @@ Qristal is a full-stack SDK for quantum accelerators.  This is its top-level col
 
 ## [X.X.X] - YYYY-MM-DD
 
+### Added
+
+- More info in README on cmake switches and new dev container available in integrations
+
 ### Breaking
 
 - Update to use qristal namespace instead of qb namespace, in line with updates to core

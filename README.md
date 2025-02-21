@@ -46,6 +46,8 @@ docker stop qristal
 
 **Prerequisites**
 
+*Bare metal*
+
 Linux (e.g. Ubuntu) is required. One may choose to use Ubuntu with WSL 2 ([Windows Subsystem for Linux](https://learn.microsoft.com/en-us/windows/wsl/)), as the installation sequence is the same. The best performance is achieved with regular Linux, due to additional overhead coming from the Windows filesystem. Please ensure if using WSL that you turn on file system case sensitivity for the location where you intend to install Qristal.
 
 Before building Qristal, you must have the following packages already installed and working:
@@ -73,6 +75,15 @@ sudo apt install build-essential cmake gfortran libboost-all-dev libcurl4-openss
 
 Qristal will be built with support for CUDA Quantum if and only if cmake detects that your system has a compatible CUDA Quantum installation.
 
+*Dev container*
+
+Alternatively, you can build Qristal in a development container, using the contents of `integrations/vscode/.devcontainer`.  For this, the only prerequisites are
+
+- Docker
+
+- an IDE compliant with the Development Container Specification (e.g. VS Code)
+
+
 **Compilation**
 
 <a name="compilation"></a>
@@ -85,7 +96,11 @@ cmake .. -DINSTALL_MISSING=ON
 make -j$(nproc) install
 ```
 
-If you wish to only install missing C++ or Python dependencies, instead of passing `-DINSTALL_MISSING=ON` you can pass `-DINSTALL_MISSING=CXX` or `-DINSTALL_MISSING=PYTHON`.
+This will automatically install all missing dependencies neither covered by the `apt` commands above nor provided by the dev container. If you wish to only install missing C++ or Python dependencies, instead of passing `-DINSTALL_MISSING=ON` you can pass `-DINSTALL_MISSING=CXX` or `-DINSTALL_MISSING=PYTHON`.
+
+Note that the dependencies to be installed include the constituent Qristal components `core`, `decoder` and `integrations`.  By default, the latest tagged releases of each of these components is pulled in. If you would like cmake to retrieve alternative versions of these components, you can specify a git ref to pull in each case, by passing `-DCORE_TAG=<YOUR_TAG>`, `-DDECODER_TAG=<YOUR_TAG>` and/or `-DINTEGRATIONS_TAG=<YOUR_TAG>` when invoking cmake. Note that for the overall build to be successful, the refs of the different components, including the top-level Qristal SDK repo itself, must correspond to versions that are compatible with one another. You can always achieve this by using the same release tag (e.g. `v1.6.0`) for everything, or simply `main`, which will refer to the tips of all `main` branches.
+
+By default, the public Qristal git repositories are used to retrieve each of these components. If you have access to and prefer to use the development repositories, you can pass `--preset=dev` when invoking cmake. Note that private repos contain refs not present in the public repos, so forgetting to include the `dev` preset can lead to errors about missing refs.
 
 If you wish to build Qristal's C++ noise-aware circuit placement routines, you must also enable the use of the additional dependency [TKET](https://github.com/CQCL/tket). This is done by passing `-DWITH_TKET=ON` to `cmake`. TKET will be installed automatically by `cmake` if both `-DWITH_TKET=ON` and `-DINSTALL_MISSING=ON` (or `-DINSTALL_MISSING=CXX`) are passed to `cmake`. Alternatively, if you have an existing TKET installation, you can pass `-DWITH_TKET=ON -DTKET_DIR=<YOUR TKET INSTALLATION DIR>` to `cmake` to tell it to use your installation rather than building TKET from source.
 
@@ -159,7 +174,7 @@ Results:
 
 ## Further examples ##
 
-Following installation, you can find 
+Following installation, you can find
 
 - A series of examples in the installed folder `examples`.  These are described [here](examples/README.md).
 - A detailed set of introductory exercises in the `exercises` folder.  These can be launched using Jupyter Notebook.
