@@ -1,6 +1,6 @@
 variables:
-  CI_IMAGE:                 registry.gitlab.com/qbau/software-and-apps/ci-dockerfiles/ubuntu_x86-22.04:all_dep_clang-2
-  EMULATOR_CI_IMAGE_CLANG:  registry.gitlab.com/qbau/software-and-apps/ci-dockerfiles/ubuntu_x86-22.04:all_dep_cuda-12.1.1_clang-2
+  CI_IMAGE:                 registry.gitlab.com/qbau/software-and-apps/ci-dockerfiles/ubuntu_amd64-22.04:all_dep_clang-3
+  EMULATOR_CI_IMAGE_CLANG:  registry.gitlab.com/qbau/software-and-apps/ci-dockerfiles/ubuntu_amd64-22.04:all_dep_cuda-12.1.1_clang-3
   DEV_REGISTRY:             registry.gitlab.com/qbau/software-and-apps/qbsdk
   PUBLIC_REGISTRY:          registry.gitlab.com/qbau/software-and-apps/public/qbsdk
   STAGING_REGISTRY:         $DEV_REGISTRY/staging
