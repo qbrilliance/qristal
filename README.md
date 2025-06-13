@@ -120,13 +120,10 @@ Here is an example of the entire workflow:
 
 ```python
 # Import the core of the QB SDK
-import qb.core
+import qristal.core
 
 # Create a quantum computing session using the QB SDK
-my_sim = qb.core.session()
-
-# Set up meaningful defaults for session parameters
-my_sim.qb12()
+my_sim = qristal.core.session()
 
 # Choose a simulator backend
 my_sim.acc = "qpp"
@@ -157,7 +154,7 @@ my_sim.run()
 print("Ran successfully!")
 
 # Print the cumulative results in each of the classical registers
-print("Results:\n", my_sim.out_raw[0][0])
+print("Results:\n", my_sim.results)
 ```
 
 If you run the example, you will get an output similar to the following (right-hand values will both be around 50):

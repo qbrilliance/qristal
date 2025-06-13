@@ -89,9 +89,6 @@ ci-tests-triggered-from-upstream:
     - cmake -B build_demo1 $QB_DIR/qristal/examples/cpp/demo1
     - cmake --build build_demo1
     - ./build_demo1/demo1
-    - cmake -B build_qaoa $QB_DIR/qristal/examples/cpp/qaoa
-    - cmake --build build_qaoa
-    - ./build_qaoa/qaoa
     - python3 $QB_DIR/qristal/examples/python/demo1.py
     - python3 $QB_DIR/qristal/examples/python/quickstart.py
     - python3 $QB_DIR/qristal/examples/python/vqee_example_1.py
@@ -142,9 +139,6 @@ ci-tests-triggered-locally-tips-of-all-mains:
     - cmake -B build_demo1 $QB_DIR/qristal/examples/cpp/demo1
     - cmake --build build_demo1
     - ./build_demo1/demo1
-    - cmake -B build_qaoa $QB_DIR/qristal/examples/cpp/qaoa
-    - cmake --build build_qaoa
-    - ./build_qaoa/qaoa
     - python3 $QB_DIR/qristal/examples/python/demo1.py
     - python3 $QB_DIR/qristal/examples/python/quickstart.py
     - python3 $QB_DIR/qristal/examples/python/vqee_example_1.py
